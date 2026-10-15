@@ -9,7 +9,7 @@ Labels: `setup` `design` `photos` `vision` `ui` `data`
 ## M0 · Setup
 
 ### 1. Create the Xcode project `setup`
-Create a SwiftUI iOS app named Sift (iOS 17+) inside `app/`.
+Create a SwiftUI iOS app named Sift (iOS 18+, iPhone only) inside `app/`.
 - [ ] Builds and runs on the simulator
 - [ ] Two empty tabs: Moments and Vault
 - [ ] Folders: `Models/`, `Services/`, `Views/`, `DesignSystem/`
