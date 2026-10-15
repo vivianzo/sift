@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keepsake Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a clickable phone on the left, a design-notes column on the right that follows the current screen; stacks on narrow widths.
+   Direction: cream stationery, navy ink, one rose accent. Hairlines over shadows, small radii, a serif that does the "cute" work in italics. */
+:root{
+  --bg:#F5F0E8; --paper:#FFFDF8; --screen:#FBF8F2; --ink:#1E2643; --muted:#6F6E7C; --line:#E4DBCD;
+  --accent:#C2607A; --accent-soft:#F5E2E5; --btn:#1E2643; --btn-ink:#FBF8F2; --link:#1E2643;
+  --sticker:#1E2643; --sticker-ink:#FBF8F2; --tape:rgba(226,186,190,.62); --bezel:#161B30; --chip:#EFE8DC;
+  --good:#4E7A63; --good-soft:#E3ECE4; --warn:#9A5B2E; --warn-soft:#F4E6D6;
+  --shadow:0 1px 0 rgba(30,38,67,.04),0 10px 30px -12px rgba(30,38,67,.18);
+  --r-lg:10px; --r-md:6px; --r-sm:3px;
+  --f-display:'Instrument Serif','Iowan Old Style','Times New Roman',serif;
+  --f-body:'Manrope',system-ui,-apple-system,sans-serif;
+  --f-mono:'DM Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1328; --paper:#192040; --screen:#131833; --ink:#F2EBE0; --muted:#A3A4B8; --line:#2B3257;
+  --accent:#E59BB0; --accent-soft:#38294A; --btn:#E59BB0; --btn-ink:#141833; --link:#E59BB0;
+  --sticker:#F2EBE0; --sticker-ink:#1E2643; --tape:rgba(229,155,176,.32); --bezel:#05070F; --chip:#212849;
+  --good:#9CC7AE; --good-soft:#1F3436; --warn:#E3B07F; --warn-soft:#3A2E2E;
+  --shadow:0 1px 0 rgba(0,0,0,.2),0 10px 30px -12px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1328; --paper:#192040; --screen:#131833; --ink:#F2EBE0; --muted:#A3A4B8; --line:#2B3257;
+  --accent:#E59BB0; --accent-soft:#38294A; --btn:#E59BB0; --btn-ink:#141833; --link:#E59BB0;
+  --sticker:#F2EBE0; --sticker-ink:#1E2643; --tape:rgba(229,155,176,.32); --bezel:#05070F; --chip:#212849;
+  --good:#9CC7AE; --good-soft:#1F3436; --warn:#E3B07F; --warn-soft:#3A2E2E;
+  --shadow:0 1px 0 rgba(0,0,0,.2),0 10px 30px -12px rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.5;padding-block:28px 48px;padding-inline:16px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible{outline:1.5px solid var(--accent);outline-offset:2px;border-radius:var(--r-md)}
+.mono{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);font-variant-numeric:tabular-nums}
+.display{font-family:var(--f-display);font-weight:400;letter-spacing:-.01em;text-wrap:balance;margin:0}
+.display em,.it{font-style:italic}
+
+.stage{display:grid;grid-template-columns:minmax(0,390px) minmax(0,340px);gap:48px;justify-content:center;align-items:start;max-width:830px;margin:0 auto}
+@media (max-width:800px){.stage{grid-template-columns:minmax(0,1fr);justify-items:center;gap:28px}}
+
+/* phone */
+.phone{width:min(390px,100%);height:800px;border:10px solid var(--bezel);border-radius:50px;background:var(--screen);position:relative;overflow:hidden;box-shadow:0 30px 60px -30px rgba(30,38,67,.45)}
+@media (max-width:480px){.phone{border-width:6px;border-radius:34px;height:760px}}
+.status{position:absolute;top:0;left:0;right:0;height:44px;display:flex;justify-content:space-between;align-items:center;padding:0 26px;font-weight:700;font-size:14px;z-index:5;background:linear-gradient(var(--screen) 60%,transparent)}
+.status .island{width:96px;height:26px;border-radius:20px;background:var(--bezel)}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative}
+.status .bat::after{content:"";position:absolute;inset:1.5px 5px 1.5px 1.5px;background:var(--ink);border-radius:1px}
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:54px 20px 96px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.scroll.nosbar{padding-bottom:28px}
+.enter{animation:enter .26s ease-out}
+@keyframes enter{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.enter{animation:none}}
+
+.tabbar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;padding:10px 40px 22px;background:color-mix(in srgb,var(--screen) 90%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:5}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:72px;position:relative}
+.tab svg{width:22px;height:22px}
+.tab[aria-current="true"]{color:var(--ink)}
+.tab .dot{position:absolute;top:-3px;right:12px;background:var(--accent);color:#fff;font-size:9.5px;letter-spacing:0;border-radius:8px;padding:0 5px;line-height:15px}
+
+/* shared bits */
+.top{padding:10px 2px 18px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.top .eyebrow{text-transform:uppercase;letter-spacing:.22em;font-size:9.5px;color:var(--accent)}
+.top h1{font-size:46px;line-height:1;margin-top:6px}
+.top p{margin:8px 0 0;color:var(--muted);font-size:13.5px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;letter-spacing:.03em;padding:3px 8px;border-radius:var(--r-sm);background:var(--chip);color:var(--muted);white-space:nowrap}
+.chip.good{background:var(--good-soft);color:var(--good)}
+.chip.hot{background:var(--accent-soft);color:var(--accent)}
+.primary{background:var(--btn);color:var(--btn-ink);font-weight:600;letter-spacing:.02em;border-radius:var(--r-md);padding:14px 18px;font-size:14px;width:100%}
+.ghost{background:transparent;border:1px solid var(--line);font-weight:600;border-radius:var(--r-md);padding:13px 16px;font-size:13.5px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;margin-bottom:8px}
+.back{display:inline-flex;align-items:center;gap:2px;color:var(--link);font-weight:600;font-size:14px}
+.back svg{width:18px;height:18px}
+.sticker{font-family:var(--f-display);font-style:italic;font-size:17px;line-height:1;background:var(--sticker);color:var(--sticker-ink);padding:4px 10px 5px;border-radius:var(--r-sm);transform:rotate(-4deg);position:absolute;z-index:2}
+.bar{height:3px;border-radius:2px;background:var(--chip);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+
+/* home cards */
+.cards{display:grid;gap:20px}
+.evcard{display:block;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);padding:6px;position:relative;width:100%}
+.collage{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:3px;height:176px;border-radius:var(--r-md);overflow:hidden}
+.collage img{width:100%;height:100%;object-fit:cover;display:block;background:var(--chip)}
+.collage img:first-child{grid-row:span 2}
+.evcard .sticker{top:-8px;right:14px}
+.evbody{padding:12px 8px 8px;display:grid;gap:6px}
+.evbody h3{font-family:var(--f-display);font-weight:400;font-size:23px;margin:0;line-height:1.1}
+.evrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.evrow span{font-size:12.5px;color:var(--muted)}
+
+/* event */
+.evhead h2{font-size:36px;line-height:1.02}
+.evhead .mono{margin:6px 0 0}
+.why{display:flex;gap:10px;align-items:flex-start;margin:16px 0 4px;padding:11px 12px;border-radius:var(--r-md);background:var(--paper);border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.why b{color:var(--ink);font-weight:600}
+.why svg{flex:none;width:16px;height:16px;color:var(--accent);margin-top:2px}
+.prog{display:grid;gap:7px;margin:16px 0 20px}
+.prog .evrow span{font-size:12px}
+.stackgrid{display:grid;grid-template-columns:1fr 1fr;gap:24px 16px}
+.pile{display:grid;gap:8px;text-align:left}
+.pile .layers{position:relative;aspect-ratio:3/4;max-width:100%}
+.pile .layers img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:var(--r-sm);border:3px solid var(--paper);box-shadow:var(--shadow);background:var(--chip)}
+.pile .layers img:nth-child(1){transform:rotate(-5deg) translate(-3px,4px)}
+.pile .layers img:nth-child(2){transform:rotate(4deg) translate(3px,2px)}
+.pile.done .layers img{transform:none}
+.badge{position:absolute;right:-5px;top:-7px;z-index:3;background:var(--ink);color:var(--screen);font-family:var(--f-mono);font-size:10.5px;border-radius:var(--r-sm);padding:2px 6px}
+.pile.done .badge{background:var(--good);color:var(--screen);display:inline-flex;gap:3px;align-items:center}
+.badge svg{width:11px;height:11px}
+.pile .lbl{display:flex;justify-content:space-between;gap:6px}
+.cta{position:sticky;bottom:-80px;padding-top:24px}
+
+/* sort */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-md);padding:2px}
+.seg button{font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:4px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--screen)}
+.sorthead{display:flex;justify-content:space-between;align-items:baseline;margin:4px 0 12px;gap:8px}
+.sorthead b{font-family:var(--f-display);font-weight:400;font-size:24px}
+.hero{position:relative;border-radius:var(--r-md);overflow:hidden;aspect-ratio:3/4;max-width:100%;background:var(--chip)}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.hero .sticker{top:14px;left:12px}
+.hero .over{position:absolute;left:0;right:0;bottom:0;padding:40px 12px 12px;background:linear-gradient(transparent,rgba(20,24,48,.6));display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hero .over .mono{color:rgba(255,253,248,.85);margin-left:auto}
+.over .chip{background:rgba(255,253,248,.92);color:#1E2643}
+.strip{display:flex;gap:8px;margin:12px 0 14px;overflow-x:auto;padding:4px 2px}
+.strip button{flex:none;width:56px;aspect-ratio:3/4;border-radius:var(--r-sm);overflow:hidden;position:relative;opacity:.6;outline:1.5px solid transparent;outline-offset:2px;transition:opacity .15s}
+.strip button[aria-pressed="true"]{opacity:1;outline-color:var(--accent)}
+.strip img{width:100%;height:100%;object-fit:cover;display:block}
+.strip .star{position:absolute;top:3px;left:3px;width:13px;height:13px;color:#fff;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
+.actions{display:grid;grid-template-columns:auto 1fr;gap:10px}
+.fine{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.shot{position:relative;border-radius:var(--r-md);overflow:hidden;aspect-ratio:3/4;max-width:100%;background:var(--chip);outline:2px solid transparent;outline-offset:-2px;transition:outline-color .15s}
+.shot img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s}
+.shot[aria-pressed="false"] img{filter:saturate(.5) brightness(.85)}
+.shot[aria-pressed="true"]{outline-color:var(--accent)}
+.shot .heart{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,253,248,.9);color:#C9BFC4}
+.shot[aria-pressed="true"] .heart{background:var(--accent);color:#fff}
+.shot .heart svg{width:15px;height:15px}
+.shot .tags{position:absolute;left:6px;bottom:6px;right:6px;display:flex;flex-wrap:wrap;gap:4px}
+.shot .tags .chip{font-size:9.5px;padding:2px 6px;background:rgba(255,253,248,.92);color:#1E2643}
+.shot .tags .chip.warn{background:rgba(250,236,220,.95);color:#8A4A1E}
+.shot .sticker{top:8px;left:6px;font-size:14px}
+
+/* done */
+.done{text-align:center;padding-top:26px}
+.fan{position:relative;height:230px;margin:0 auto 20px;width:100%;max-width:320px}
+.fan .pol{position:absolute;left:50%;top:10px;width:130px;margin-left:-65px}
+.done h2{font-size:32px;line-height:1.05;padding:0 6px}
+.done p{color:var(--muted);margin:12px 8px 22px;font-size:13.5px}
+.statrow{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:20px;text-align:left;background:var(--paper)}
+.stat{padding:12px 14px}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat b{display:block;font-family:var(--f-display);font-weight:400;font-size:34px;font-variant-numeric:tabular-nums;line-height:1}
+.stat span{font-size:12px;color:var(--muted)}
+.stack-btns{display:grid;gap:10px}
+
+/* vault */
+.pol{background:#FFFDF8;padding:7px 7px 26px;border-radius:1px;box-shadow:0 1px 2px rgba(30,38,67,.10),0 12px 24px -10px rgba(30,38,67,.25);position:relative}
+.pol img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:#eee}
+.pol .cap{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-family:var(--f-display);font-style:italic;font-size:14px;color:#3B4262;line-height:1}
+.pol .tape{position:absolute;top:-8px;left:50%;width:48px;height:16px;margin-left:-24px;background:var(--tape);transform:rotate(-4deg)}
+.spread{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 14px 22px;margin-bottom:18px}
+.spread header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.spread h3{font-family:var(--f-display);font-style:italic;font-weight:400;font-size:26px;line-height:1;margin:0}
+.spread .stamp{border:1px solid var(--accent);color:var(--accent);border-radius:2px;padding:2px 6px;transform:rotate(2deg);font-size:9.5px;text-transform:uppercase;letter-spacing:.14em}
+.pols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 10px;padding:4px 4px 0}
+.pols .pol{padding:5px 5px 18px}
+.pols .pol .cap{font-size:11.5px}
+.pols .more{display:grid;place-items:center;font-family:var(--f-display);font-style:italic;font-size:18px;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r-sm);aspect-ratio:3/4.4}
+.listrow{display:flex;align-items:center;gap:12px;background:transparent;border-top:1px solid var(--line);padding:13px 4px;width:100%;text-align:left}
+.listrow svg{width:20px;height:20px;color:var(--muted);flex:none}
+.listrow div{flex:1;min-width:0}
+.listrow b{display:block;font-size:13.5px;font-weight:600}
+.listrow span{font-size:12px;color:var(--muted)}
+.empty{text-align:center;padding:28px 10px;color:var(--muted)}
+
+.toast{position:absolute;left:50%;bottom:30px;transform:translate(-50%,20px);background:var(--ink);color:var(--screen);font-weight:600;font-size:12.5px;padding:10px 16px;border-radius:var(--r-md);opacity:0;transition:.25s;z-index:9;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* notes */
+.notes{position:sticky;top:24px;display:grid;gap:14px;min-width:0;width:100%;max-width:390px}
+.notes .kicker{text-transform:uppercase;letter-spacing:.2em;font-size:9.5px;color:var(--accent)}
+.notes h2{font-family:var(--f-display);font-weight:400;font-size:32px;line-height:1.05;margin:0;text-wrap:balance}
+.notes p{margin:0;max-width:62ch}
+.notes .how{border-left:1px solid var(--accent);padding:2px 0 2px 14px;color:var(--muted);font-size:13.5px}
+.notes .q{border:1px solid var(--line);background:var(--paper);border-radius:var(--r-md);padding:14px 16px}
+.notes .q b{display:block;font-family:var(--f-display);font-style:italic;font-weight:400;font-size:20px;color:var(--accent);line-height:1;margin-bottom:6px}
+.flow{display:flex;flex-wrap:wrap;gap:6px}
+.flow button{font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:var(--r-sm);border:1px solid var(--line);color:var(--muted)}
+.flow button[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--screen)}
+</style>
+
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="status"><span>9:41</span><span class="island"></span><span class="bat"></span></div>
+    <div class="scroll" id="scroll"></div>
+    <nav class="tabbar" id="tabbar"></nav>
+    <div class="toast" id="toast"></div>
+  </div>
+  <aside class="notes" id="notes" aria-live="polite"></aside>
+</div>
+
+<script>
+/* ---------- tiny helpers ---------- */
+const rng = seed => { let s = (seed * 2654435761) >>> 0 || 1; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; };
+const pick = (r, a) => a[Math.floor(r() * a.length)];
+const $ = id => document.getElementById(id);
+const I = {
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  heart:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.5 8 3.6 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.4 0 5.5 3.5 4.3 6.8-1.8 4.8-9.3 9.2-9.3 9.2z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 6.8L21 11l-6.8 2.2L12 20l-2.2-6.8L3 11l6.8-2.2z"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0113 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>',
+  moments:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="13" height="15" rx="2.5"/><path d="M8 3h10.5A2.5 2.5 0 0121 5.5V16"/></svg>',
+  vault:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 015.5 4H11l1 2h6.5A1.5 1.5 0 0120 7.5v11a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 18.5z"/><path d="M12 16.5s-3-1.8-3-3.8a1.6 1.6 0 013-.8 1.6 1.6 0 013 .8c0 2-3 3.8-3 3.8z" fill="currentColor" stroke="none"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9.5A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5V9M10 13h4"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>'
+};
+
+/* ---------- placeholder photo generator (stand-ins for real camera roll shots) ---------- */
+const W = 300, H = 400;
+function friends(x, r, v, night){
+  const g = x.createLinearGradient(0,0,0,H);
+  const h = r()*360;
+  if (night){ g.addColorStop(0,'#24143a'); g.addColorStop(1,'#5a2a5c'); }
+  else { g.addColorStop(0,`hsl(${h},65%,86%)`); g.addColorStop(1,`hsl(${h+35},55%,74%)`); }
+  x.fillStyle = g; x.fillRect(-40,-40,W+80,H+80);
+  x.globalCompositeOperation = 'lighter';
+  for (let i=0;i<9;i++){ x.fillStyle = `hsla(${r()*360},90%,70%,${night?.35:.18})`; x.beginPath(); x.arc(r()*W, r()*H*.6, 10+r()*26, 0, 7); x.fill(); }
+  x.globalCompositeOperation = 'source-over';
+  const n = 2 + (r() > .5 ? 1 : 0);
+  const skins = ['#f3cfb0','#dba47c','#a9714c','#7b4b2f','#f6dcc4'], hairs = ['#2b1b14','#4a2e1e','#121014','#7a4a28','#d9b26a'];
+  for (let i=0;i<n;i++){
+    const cx = W*(i+.5)/n + (r()-.5)*18, cy = H*.47 + (r()-.5)*24;
+    const skin = pick(r, skins), hair = pick(r, hairs);
+    x.fillStyle = `hsl(${r()*360},55%,${night?45:60}%)`;
+    x.beginPath(); x.ellipse(cx, cy+150, 64, 112, 0, 0, 7); x.fill();
+    x.fillStyle = hair; x.beginPath(); x.arc(cx, cy-3, 45, 0, 7); x.fill();
+    x.fillStyle = skin; x.beginPath(); x.arc(cx, cy+4, 39, 0, 7); x.fill();
+    x.fillStyle = hair; x.beginPath(); x.ellipse(cx, cy-26, 40, 18, 0, Math.PI, 0); x.fill();
+    x.fillStyle = 'rgba(240,110,130,.35)';
+    x.beginPath(); x.arc(cx-23, cy+16, 7, 0, 7); x.arc(cx+23, cy+16, 7, 0, 7); x.fill();
+    x.strokeStyle = '#2a1a1a'; x.fillStyle = '#2a1a1a'; x.lineWidth = 3; x.lineCap = 'round';
+    if (v.closed && i === v.closed - 1){
+      x.beginPath(); x.arc(cx-14, cy+3, 5, .15*Math.PI, .85*Math.PI); x.stroke();
+      x.beginPath(); x.arc(cx+14, cy+3, 5, .15*Math.PI, .85*Math.PI); x.stroke();
+    } else {
+      x.beginPath(); x.arc(cx-14, cy+4, 4.2, 0, 7); x.arc(cx+14, cy+4, 4.2, 0, 7); x.fill();
+    }
+    x.beginPath(); x.arc(cx, cy+15, 10, .18*Math.PI, .82*Math.PI); x.stroke();
+  }
+}
+const SCENES = {
+  concert(x, r){
+    const g = x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#0f0824'); g.addColorStop(1,'#3a1650');
+    x.fillStyle = g; x.fillRect(-40,-40,W+80,H+80);
+    const hue = r()*360;
+    x.globalCompositeOperation = 'lighter';
+    const glow = x.createRadialGradient(W/2,H*.6,10,W/2,H*.6,170); glow.addColorStop(0,`hsla(${hue},90%,62%,.65)`); glow.addColorStop(1,'hsla(0,0%,0%,0)');
+    x.fillStyle = glow; x.fillRect(-40,-40,W+80,H+80);
+    for (let i=0;i<5;i++){
+      const bx = W*(.08+.21*i), hh = hue + (i%2 ? 60 : -40), sway = (r()-.5)*120;
+      const gg = x.createLinearGradient(0,0,0,H*.7); gg.addColorStop(0,`hsla(${hh},95%,72%,.7)`); gg.addColorStop(1,`hsla(${hh},95%,60%,0)`);
+      x.fillStyle = gg; x.beginPath(); x.moveTo(bx-5,-10); x.lineTo(bx+5,-10); x.lineTo(bx+sway+48,H*.72); x.lineTo(bx+sway-48,H*.72); x.fill();
+    }
+    x.globalCompositeOperation = 'source-over';
+    x.fillStyle = '#0a0614';
+    const px = W/2 + (r()-.5)*50;
+    x.beginPath(); x.arc(px, H*.55, 8, 0, 7); x.fill(); x.fillRect(px-7, H*.565, 14, 30);
+    x.fillRect(-40, H*.63, W+80, 8);
+    for (let k=0;k<10;k++){
+      const hx = k*W/8 - 20 + (r()-.5)*18, hy = H*.8 + r()*28, hr = 22 + r()*10;
+      x.fillStyle = '#06030c'; x.beginPath(); x.arc(hx, hy, hr, 0, 7); x.fill(); x.fillRect(hx-hr-8, hy+hr*.6, hr*2+16, H);
+      if (r() > .7){
+        x.strokeStyle = '#06030c'; x.lineWidth = 9; x.beginPath(); x.moveTo(hx+10, hy+20); x.lineTo(hx+26, hy-48); x.stroke();
+        x.fillStyle = '#d7ebff'; x.fillRect(hx+18, hy-72, 16, 26);
+      }
+    }
+  },
+  friendsNight(x, r, v){ friends(x, r, v, true); },
+  friendsDay(x, r, v){ friends(x, r, v, false); },
+  city(x, r){
+    const g = x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#b9def6'); g.addColorStop(1,'#fad7e1');
+    x.fillStyle = g; x.fillRect(-40,-40,W+80,H+80);
+    const cols = ['#f7c9a8','#f4e1a1','#a9d3c9','#f2b5c4','#c9c3ef','#fff0dc'];
+    let bx = -40;
+    while (bx < W+40){
+      const bw = 52 + r()*34, bh = H*(.32 + r()*.36), top = H*.84 - bh;
+      x.fillStyle = pick(r, cols); x.fillRect(bx, top, bw, bh);
+      x.fillStyle = '#c8644a'; x.beginPath(); x.moveTo(bx-4, top); x.lineTo(bx+bw/2, top-18); x.lineTo(bx+bw+4, top); x.fill();
+      for (let wy = top+14; wy < H*.8; wy += 26) for (let wx = bx+9; wx < bx+bw-14; wx += 18){
+        x.fillStyle = '#fff'; x.fillRect(wx-2, wy-2, 13, 17); x.fillStyle = '#5d7ea5'; x.fillRect(wx, wy, 9, 13);
+      }
+      bx += bw;
+    }
+    x.fillStyle = '#d9cfc4'; x.fillRect(-40, H*.84, W+80, H);
+    const tx = W*.12 + r()*50;
+    x.fillStyle = '#f6c42f'; x.beginPath(); x.roundRect(tx, H*.7, 160, 74, 12); x.fill();
+    x.fillStyle = '#fff6d6'; for (let i=0;i<4;i++) x.fillRect(tx+12+i*37, H*.72, 28, 24);
+    x.fillStyle = '#c0392b'; x.fillRect(tx, H*.7+50, 160, 6);
+  },
+  brunch(x, r){
+    x.fillStyle = '#e8d2b6'; x.fillRect(-40,-40,W+80,H+80);
+    x.strokeStyle = 'rgba(150,100,60,.18)'; x.lineWidth = 2;
+    for (let y=-30;y<H+30;y+=34){ x.beginPath(); x.moveTo(-40,y); x.bezierCurveTo(80,y+8,200,y-8,W+40,y+4); x.stroke(); }
+    const plate = (px, py, rr) => {
+      x.fillStyle = 'rgba(80,50,30,.18)'; x.beginPath(); x.arc(px+5, py+7, rr, 0, 7); x.fill();
+      x.fillStyle = '#fbfaf7'; x.beginPath(); x.arc(px, py, rr, 0, 7); x.fill();
+      x.strokeStyle = '#ece7df'; x.lineWidth = 3; x.beginPath(); x.arc(px, py, rr*.78, 0, 7); x.stroke();
+    };
+    const p1x = W*.42 + (r()-.5)*30, p1y = H*.58;
+    plate(p1x, p1y, 92);
+    x.fillStyle = '#c98b4a'; x.beginPath(); x.roundRect(p1x-58, p1y-30, 62, 54, 10); x.fill();
+    x.fillStyle = '#7fb069'; x.beginPath(); x.ellipse(p1x-26, p1y-2, 22, 14, .4, 0, 7); x.fill();
+    x.fillStyle = '#fff'; x.beginPath(); x.ellipse(p1x+30, p1y+18, 30, 24, 0, 0, 7); x.fill();
+    x.fillStyle = '#f7b928'; x.beginPath(); x.arc(p1x+32, p1y+16, 11, 0, 7); x.fill();
+    x.fillStyle = '#e6455f'; for (let i=0;i<5;i++){ x.beginPath(); x.arc(p1x+10+r()*40, p1y-40+r()*20, 6, 0, 7); x.fill(); }
+    const cx = W*.8, cy = H*.2;
+    x.fillStyle = 'rgba(80,50,30,.2)'; x.beginPath(); x.arc(cx+4, cy+6, 44, 0, 7); x.fill();
+    x.fillStyle = '#fff'; x.beginPath(); x.arc(cx, cy, 44, 0, 7); x.fill();
+    x.fillStyle = '#7a4a2a'; x.beginPath(); x.arc(cx, cy, 33, 0, 7); x.fill();
+    x.fillStyle = '#f2e2cf'; x.beginPath(); x.moveTo(cx, cy+14); x.bezierCurveTo(cx-26, cy-4, cx-10, cy-22, cx, cy-8); x.bezierCurveTo(cx+10, cy-22, cx+26, cy-4, cx, cy+14); x.fill();
+  },
+  sunset(x, r){
+    const hz = H*.58;
+    const g = x.createLinearGradient(0,0,0,hz); g.addColorStop(0,'#2d2f6e'); g.addColorStop(.55,'#ef7b84'); g.addColorStop(1,'#ffc46e');
+    x.fillStyle = g; x.fillRect(-40,-40,W+80,hz+40);
+    const sx = W*.5 + (r()-.5)*90;
+    x.fillStyle = '#fff2bd'; x.beginPath(); x.arc(sx, hz-30, 38, 0, 7); x.fill();
+    const s = x.createLinearGradient(0,hz,0,H); s.addColorStop(0,'#4a4685'); s.addColorStop(1,'#1d2150');
+    x.fillStyle = s; x.fillRect(-40, hz, W+80, H);
+    x.fillStyle = 'rgba(255,220,150,.55)';
+    for (let i=0;i<8;i++){ const w = 70 - i*7; x.fillRect(sx - w/2 + (r()-.5)*10, hz+6+i*11, w, 3); }
+    x.fillStyle = '#e8c49b'; x.beginPath(); x.moveTo(-40, H*.84); x.quadraticCurveTo(W/2, H*.78, W+40, H*.86); x.lineTo(W+40,H+40); x.lineTo(-40,H+40); x.fill();
+  }
+};
+const photoCache = new Map();
+function photo(e, s, j){
+  const key = `${e}-${s}-${j}`;
+  if (photoCache.has(key)) return photoCache.get(key);
+  const st = EVENTS[e].stacks[s], v = st.shots[j].v;
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  x.save();
+  x.translate(W/2, H/2); x.rotate((v.tilt||0)*Math.PI/180); x.scale(1.14,1.14); x.translate(-W/2 + v.dx, -H/2);
+  SCENES[st.scene](x, rng(st.seed), v);
+  x.restore();
+  if (v.bright){ x.fillStyle = v.bright > 0 ? `rgba(255,255,255,${v.bright})` : `rgba(8,4,18,${-v.bright})`; x.fillRect(0,0,W,H); }
+  if (v.blur){
+    const sm = document.createElement('canvas'); sm.width = W/7; sm.height = H/7;
+    sm.getContext('2d').drawImage(c, 0, 0, sm.width, sm.height);
+    x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(sm, 0, 0, W, H);
+  }
+  const url = c.toDataURL('image/jpeg', .82);
+  photoCache.set(key, url);
+  return url;
+}
+
+/* ---------- sample moments (what the app would build from timestamps + GPS) ---------- */
+const EVENTS = [
+  {title:'Lorde at TD Garden', place:'TD Garden, Boston', coords:'42.3662° N, 71.0621° W', date:'Fri, Oct 3', start:20*60+12, mins:172, span:'8:12 – 11:04 PM',
+   rule:'Taken over 2 hr 52 min, all within 150 m of each other.', scenes:['concert','friendsNight','concert','concert','friendsNight','concert','concert','friendsNight'], seed:11, isNew:true},
+  {title:'Sunday brunch', place:'Tatte, Beacon Hill', coords:'42.3581° N, 71.0707° W', date:'Sun, Oct 5', start:11*60+20, mins:45, span:'11:20 AM – 12:05 PM',
+   rule:'Taken over 45 min at one table. Nothing else nearby that morning.', scenes:['brunch','friendsDay','brunch','friendsDay','brunch'], seed:23, isNew:true},
+  {title:'Sunset at Revere Beach', place:'Revere Beach, MA', coords:'42.4085° N, 70.9915° W', date:'Tue, Sep 30', start:18*60+31, mins:31, span:'6:31 – 7:02 PM',
+   rule:'Taken over 31 min along 400 m of beach.', scenes:['sunset','friendsDay','sunset','sunset'], seed:37},
+  {title:'Lisbon, day two', place:'Alfama, Lisbon', coords:'38.7114° N, 9.1300° W', date:'Sat, Aug 16', start:10*60+4, mins:584, span:'10:04 AM – 7:48 PM',
+   rule:'One day of your Lisbon trip, split from days one and three by the overnight gaps.', scenes:['city','friendsDay','city','sunset','city','brunch','city'], seed:51, presorted:true},
+];
+const FLAGS = {concert:['blurry','tilted','too dark','near-duplicate'], friendsNight:['eyes closed','blurry','too dark'], friendsDay:['eyes closed','blurry','tilted'],
+  city:['tilted','blurry','near-duplicate'], brunch:['blurry','too dark','near-duplicate'], sunset:['tilted','blurry','too dark']};
+const REASONS = {concert:['sharpest','steady','best exposure'], friendsNight:['eyes open','faces in focus','sharpest'], friendsDay:['eyes open','faces in focus','sharpest'],
+  city:['level','sharpest'], brunch:['sharpest','best light'], sunset:['level horizon','best light']};
+const fmt = (m, sec) => { const h = Math.floor(m/60)%24, mm = Math.floor(m%60); const hh = h%12 || 12;
+  return `${hh}:${String(mm).padStart(2,'0')}${sec != null ? ':' + String(sec).padStart(2,'0') : ''} ${h<12?'AM':'PM'}`; };
+
+EVENTS.forEach((ev, e) => {
+  const r = rng(ev.seed);
+  ev.stacks = ev.scenes.map((scene, s) => {
+    const size = 2 + Math.floor(r()*4), best = Math.floor(r()*size);
+    const at = ev.start + ev.mins * s / ev.scenes.length + r()*4;
+    let sec = Math.floor(r()*40);
+    const shots = Array.from({length:size}, (_, j) => {
+      const flags = [];
+      const v = {dx:(r()-.5)*22, bright:(r()-.5)*.12, tilt:0, blur:false, closed:0};
+      if (j !== best){
+        const f = pick(r, FLAGS[scene]); flags.push(f);
+        if (f === 'blurry') v.blur = true;
+        if (f === 'tilted') v.tilt = (r() > .5 ? 1 : -1) * (5 + r()*4);
+        if (f === 'too dark') v.bright = -.42;
+        if (f === 'eyes closed') v.closed = 1 + Math.floor(r()*2);
+      }
+      sec += 1 + Math.floor(r()*3);
+      return {flags, v, time: fmt(at + Math.floor(sec/60), sec%60)};
+    });
+    return {scene, shots, best, seed: ev.seed*100 + s, reasons: REASONS[scene].slice(0, 2), time: fmt(at)};
+  });
+});
+const picks = EVENTS.map(() => ({}));
+EVENTS[3].stacks.forEach((st, s) => { picks[3][s] = st.shots.length > 3 && s % 3 === 0 ? [st.best, (st.best+1) % st.shots.length] : [st.best]; });
+
+const stats = e => {
+  const ev = EVENTS[e], p = picks[e];
+  const shots = ev.stacks.reduce((a, st) => a + st.shots.length, 0);
+  const sorted = Object.keys(p).length;
+  const kept = Object.values(p).reduce((a, k) => a + k.length, 0);
+  const seen = Object.keys(p).reduce((a, s) => a + ev.stacks[s].shots.length, 0);
+  return {shots, stacks: ev.stacks.length, sorted, kept, archived: seen - kept};
+};
+
+/* ---------- state + rendering ---------- */
+const S = {screen:'home', e:0, s:0, mode:'quick', sel:new Set()};
+const img = (e, s, j, alt='') => `<img data-k="${e}-${s}-${j}" alt="${alt}">`;
+
+function home(){
+  return `<header class="top"><div class="eyebrow mono">Keepsake</div><h1 class="display">Your <em>moments</em></h1>
+    <p>2 new since Friday, grouped by when and where you took them.</p></header>
+    <div class="cards">${EVENTS.map((ev, e) => {
+      const t = stats(e);
+      const pill = t.sorted === 0 ? `<span class="chip hot">Not sorted</span>`
+        : t.sorted < t.stacks ? `<span class="chip">${t.sorted} of ${t.stacks} sorted</span>`
+        : `<span class="chip good">${I.check.replace('<svg','<svg width="12" height="12"')} Kept ${t.kept}</span>`;
+      return `<button class="evcard" data-act="open" data-e="${e}">
+        ${ev.isNew && t.sorted === 0 ? '<span class="sticker">new!</span>' : ''}
+        <div class="collage">${[0,1,2].map(s => img(e, s, ev.stacks[s].best)).join('')}</div>
+        <div class="evbody"><h3>${ev.title}</h3>
+          <div class="mono">${ev.date} · ${ev.place}</div>
+          <div class="evrow"><span>${t.shots} photos in ${t.stacks} stacks</span>${pill}</div>
+          <div class="bar"><i style="width:${100*t.sorted/t.stacks}%"></i></div>
+        </div></button>`;
+    }).join('')}</div>`;
+}
+
+function eventScreen(){
+  const e = S.e, ev = EVENTS[e], t = stats(e), left = t.stacks - t.sorted;
+  return `<div class="nav"><button class="back" data-act="home">${I.back}Moments</button></div>
+    <div class="evhead"><h2 class="display">${ev.title}</h2>
+      <p class="mono">${ev.date} · ${ev.span}</p><p class="mono">${ev.coords}</p></div>
+    <div class="why">${I.pin}<span><b>Why these are together.</b> ${ev.rule}</span></div>
+    <div class="prog"><div class="evrow"><span>${t.shots} photos became ${t.stacks} stacks</span><span>${t.sorted} of ${t.stacks} sorted</span></div>
+      <div class="bar"><i style="width:${100*t.sorted/t.stacks}%"></i></div></div>
+    <div class="stackgrid">${ev.stacks.map((st, s) => {
+      const k = picks[e][s];
+      if (k) return `<button class="pile done" data-act="sortat" data-s="${s}" aria-label="Stack ${s+1}, sorted">
+          <div class="layers">${img(e, s, k.length ? k[0] : st.best)}<span class="badge">${I.check} ${k.length} kept</span></div>
+          <div class="lbl"><span class="mono">${st.time}</span><span class="mono">${st.shots.length} shots</span></div></button>`;
+      const order = st.shots.map((_, j) => j).filter(j => j !== st.best).slice(0, 2).concat(st.best);
+      return `<button class="pile" data-act="sortat" data-s="${s}" aria-label="Stack ${s+1}, ${st.shots.length} similar shots">
+          <div class="layers">${order.map(j => img(e, s, j)).join('')}<span class="badge">×${st.shots.length}</span></div>
+          <div class="lbl"><span class="mono">${st.time}</span><span class="mono">${st.shots.length} shots</span></div></button>`;
+    }).join('')}</div>
+    <div class="cta">${left ? `<button class="primary" data-act="sortnext">Sort ${left} stack${left>1?'s':''}</button>`
+      : `<button class="primary" data-act="vault">See it in the vault</button>`}</div>`;
+}
+
+function sortScreen(){
+  const e = S.e, ev = EVENTS[e], st = ev.stacks[S.s], n = st.shots.length;
+  const head = `<div class="nav"><button class="back" data-act="event">${I.back}${ev.title.split(' ')[0].replace(',','')}</button>
+      <div class="seg" role="group" aria-label="Sorting style">
+        <button data-act="mode" data-m="quick" aria-pressed="${S.mode==='quick'}">Quick pick</button>
+        <button data-act="mode" data-m="compare" aria-pressed="${S.mode==='compare'}">Compare</button></div></div>
+    <div class="sorthead"><b>Stack ${S.s+1} of ${ev.stacks.length}</b><span class="mono">${n} shots · ${st.shots[0].time}</span></div>`;
+  if (S.mode === 'quick'){
+    const j = [...S.sel][0], shot = st.shots[j], isBest = j === st.best;
+    const chips = isBest ? st.reasons.map(t => `<span class="chip">${t}</span>`).join('') : shot.flags.map(f => `<span class="chip">${f}</span>`).join('');
+    return head + `<div class="hero">${img(e, S.s, j)}${isBest ? '<span class="sticker">best guess</span>' : ''}
+        <div class="over">${chips}<span class="mono">${shot.time}</span></div></div>
+      <div class="strip" role="group" aria-label="Shots in this stack">${st.shots.map((_, k) =>
+        `<button data-act="pick" data-j="${k}" aria-pressed="${k===j}" aria-label="Shot ${k+1}">${img(e, S.s, k)}${k===st.best ? `<span class="star">${I.star}</span>` : ''}</button>`).join('')}</div>
+      <div class="actions"><button class="ghost" data-act="mode" data-m="compare">Keep more</button>
+        <button class="primary" data-act="commit">Keep this one</button></div>
+      <p class="fine">The other ${n-1} go to Archive. Nothing is deleted.</p>`;
+  }
+  const k = S.sel.size;
+  return head + `<div class="cgrid">${st.shots.map((shot, j) => `<button class="shot" data-act="toggle" data-j="${j}" aria-pressed="${S.sel.has(j)}" aria-label="Shot ${j+1}">
+      ${img(e, S.s, j)}${j===st.best ? '<span class="sticker">best guess</span>' : ''}<span class="heart">${I.heart}</span>
+      <span class="tags">${(j===st.best ? st.reasons.map(t=>`<span class="chip">${t}</span>`) : shot.flags.map(f=>`<span class="chip warn">${f}</span>`)).join('')}</span></button>`).join('')}</div>
+    <button class="primary" data-act="commit">${k ? `Keep ${k} · archive ${n-k}` : `Archive all ${n}`}</button>
+    <p class="fine">Tap the hearts to choose. Shots you leave go to Archive.</p>`;
+}
+
+function doneScreen(){
+  const e = S.e, ev = EVENTS[e], t = stats(e);
+  const kept = Object.entries(picks[e]).flatMap(([s, ks]) => ks.map(j => [+s, j])).slice(0, 5);
+  const rot = [-14, -6, 2, 9, 16];
+  return `<div class="done"><div class="fan">${kept.map(([s, j], i) => {
+      const a = rot[i] * (kept.length > 1 ? 1 : 0);
+      return `<div class="pol" style="transform:translateX(${(i-(kept.length-1)/2)*34}px) rotate(${a}deg)">${img(e, s, j)}</div>`; }).join('')}</div>
+    <h2 class="display">${ev.title} is in your vault</h2>
+    <p>You kept ${t.kept} of ${t.shots} photos. The rest are in Archive, so nothing was deleted.</p>
+    <div class="statrow"><div class="stat"><b>${t.kept}</b><span>favorites saved</span></div>
+      <div class="stat"><b>${t.archived}</b><span>moved to Archive</span></div></div>
+    <div class="stack-btns"><button class="primary" data-act="vault">Open the scrapbook</button>
+      <button class="ghost" data-act="home">Back to Moments</button></div></div>`;
+}
+
+function vault(){
+  const withKeeps = EVENTS.map((_, e) => e).filter(e => stats(e).kept > 0);
+  const waiting = EVENTS.map((ev, e) => [ev, e]).filter(([, e]) => stats(e).sorted < EVENTS[e].stacks.length);
+  const total = withKeeps.reduce((a, e) => a + stats(e).kept, 0);
+  const archived = EVENTS.reduce((a, _, e) => a + stats(e).archived, 0);
+  const caps = ['this one', 'core memory', 'so good', 'golden hour', 'the light', 'us', 'oh wow', 'again soon'];
+  return `<header class="top"><div class="eyebrow mono">Keepsake</div><h1 class="display">The <em>vault</em></h1>
+    <p>${total} favorites from ${withKeeps.length} moment${withKeeps.length===1?'':'s'}. Saved as links to your library, so they take no extra space.</p></header>
+    ${withKeeps.map(e => {
+      const ev = EVENTS[e], r = rng(ev.seed + 7), t = stats(e);
+      const ks = Object.entries(picks[e]).flatMap(([s, k]) => k.map(j => [+s, j]));
+      const show = ks.slice(0, ks.length > 6 ? 5 : 6);
+      return `<section class="spread"><header><h3>${ev.title}</h3><span class="mono stamp">${ev.date}</span></header>
+        <div class="pols">${show.map(([s, j], i) => `<div class="pol" style="transform:rotate(${(r()-.5)*10}deg)">${i%2 ? '' : '<span class="tape"></span>'}${img(e, s, j)}<span class="cap">${pick(r, caps)}</span></div>`).join('')}
+        ${ks.length > 6 ? `<div class="more">+${ks.length - 5} more</div>` : ''}</div>
+        ${t.sorted < t.stacks ? `<p class="mono" style="margin:14px 2px 0">${t.stacks - t.sorted} stacks still to sort</p>` : ''}</section>`;
+    }).join('') || '<div class="empty">Sort a moment and your favorites land here.</div>'}
+    <button class="listrow" data-act="toast" data-msg="Archive is a plain album in Photos you can review or empty">${I.box}<div><b>Archive</b><span>${archived} photos you passed on</span></div></button>
+    ${waiting.map(([ev, e]) => `<button class="listrow" data-act="open" data-e="${e}">${I.clock}<div><b>${ev.title}</b><span>${stats(e).stacks - stats(e).sorted} stacks waiting</span></div></button>`).join('')}`;
+}
+
+const NOTES = {
+  home:{k:'Screen 1 · Moments', h:'Albums that make themselves',
+    p:'Every time you open the app it scans new photos and groups them into moments. A new moment starts when there is a long gap in time or you move somewhere else.',
+    how:'On device: PhotoKit gives each photo a timestamp and GPS location. Cluster by gaps of about 90 minutes or about 1 km, then name it from the venue or neighborhood with reverse geocoding.',
+    q:'Should a whole trip be one moment, or one per day like the Lisbon card?'},
+  event:{k:'Screen 2 · One moment', h:'Piles of near-identical shots',
+    p:'Each pile is a stack: shots taken seconds apart that look almost the same. You sort piles instead of 31 single photos. The "why" box is there so the grouping never feels random.',
+    how:'On device: Apple\'s Vision framework gives each photo a "feature print". Shots close in time whose prints are close in distance go in the same stack.',
+    q:'Single photos that match nothing: show them as their own section, or keep them all automatically?'},
+  sort:{k:'Screen 3 · Sorting', h:'Two ways to pick a winner',
+    p:'Quick pick shows the app\'s best guess and you confirm with one tap. Compare shows every shot side by side and you heart the keepers. Switch between them at the top and try a few stacks each way.',
+    how:'Best guess: Vision scores sharpness and image quality and detects faces and closed eyes. The chips explain the pick ("eyes open", "level horizon").',
+    q:'Which style would you actually use at 1 a.m. on the train home from a concert?'},
+  done:{k:'Screen 4 · Finished', h:'A small reward, and nothing deleted',
+    p:'Finishing a moment should feel good. The photos you passed on go to an Archive album, which removes the fear of losing a photo for good, a big reason people never clean up.',
+    how:'Archive is a normal album in Photos. Emptying it can go through iOS Recently Deleted, so it stays reversible for 30 days.',
+    q:'Would you want a "clear Archive" reminder after a few weeks, or never?'},
+  vault:{k:'Screen 5 · Vault', h:'The scrapbook of favorites',
+    p:'Only keepers show up here, laid out as pages per moment instead of a grid. This is the screen you would scroll for nostalgia or open when planning a post.',
+    how:'Storage: the app saves PhotoKit identifiers, the moment details and your picks. It never copies image files, so the vault is a few kilobytes.',
+    q:'Captions: write your own, have the app suggest them, or skip them?'}
+};
+
+function render(){
+  const sc = $('scroll');
+  sc.innerHTML = ({home, event:eventScreen, sort:sortScreen, done:doneScreen, vault})[S.screen]();
+  sc.classList.toggle('nosbar', S.screen === 'sort');
+  sc.querySelectorAll('img[data-k]').forEach(el => { const [e, s, j] = el.dataset.k.split('-').map(Number); el.src = photo(e, s, j); });
+  const onVault = S.screen === 'vault';
+  const kept = EVENTS.reduce((a, _, e) => a + stats(e).kept, 0);
+  $('tabbar').hidden = S.screen === 'sort';
+  $('tabbar').innerHTML = `<button class="tab" data-act="home" aria-current="${!onVault}">${I.moments}Moments</button>
+    <button class="tab" data-act="vault" aria-current="${onVault}">${I.vault}Vault<span class="dot">${kept}</span></button>`;
+  const n = NOTES[S.screen];
+  const flow = [['home','Moments'],['event','Moment'],['sort','Sorting'],['done','Finished'],['vault','Vault']];
+  $('notes').innerHTML = `<div class="flow" role="group" aria-label="Jump to screen">${flow.map(([id, l]) =>
+      `<button data-jump="${id}" aria-current="${S.screen===id}">${l}</button>`).join('')}</div>
+    <div class="mono kicker">${n.k}</div><h2>${n.h}</h2><p>${n.p}</p><p class="how">${n.how}</p>
+    <div class="q"><b>Question for you</b>${n.q}</div>`;
+}
+function go(screen){ S.screen = screen; render(); const sc = $('scroll'); sc.scrollTop = 0; sc.classList.remove('enter'); void sc.offsetWidth; sc.classList.add('enter'); }
+function startSort(s){ S.s = s; const k = picks[S.e][s]; const best = EVENTS[S.e].stacks[s].best;
+  S.sel = new Set(k ? k : [best]); if (k && k.length > 1) S.mode = 'compare'; go('sort'); }
+const nextUnsorted = e => EVENTS[e].stacks.findIndex((_, s) => !picks[e][s]);
+let tt;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 1800); }
+
+$('phone').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'home') go('home');
+  else if (a === 'vault') go('vault');
+  else if (a === 'open'){ S.e = +b.dataset.e; go('event'); }
+  else if (a === 'event') go('event');
+  else if (a === 'sortat') startSort(+b.dataset.s);
+  else if (a === 'sortnext') startSort(nextUnsorted(S.e));
+  else if (a === 'mode'){ S.mode = b.dataset.m; if (S.mode === 'quick' && S.sel.size !== 1) S.sel = new Set([S.sel.size ? [...S.sel][0] : EVENTS[S.e].stacks[S.s].best]); render(); }
+  else if (a === 'pick'){ S.sel = new Set([+b.dataset.j]); render(); }
+  else if (a === 'toggle'){ const j = +b.dataset.j; S.sel.has(j) ? S.sel.delete(j) : S.sel.add(j); render(); }
+  else if (a === 'commit'){
+    const n = EVENTS[S.e].stacks[S.s].shots.length, k = S.sel.size;
+    picks[S.e][S.s] = [...S.sel].sort((x, y) => x - y);
+    if (!k) picks[S.e][S.s] = [];
+    const nx = nextUnsorted(S.e);
+    if (nx < 0) go('done'); else { startSort(nx); toast(`Kept ${k} · ${n-k} to Archive`); }
+  }
+  else if (a === 'toast') toast(b.dataset.msg);
+});
+$('notes').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-jump]'); if (!b) return;
+  const id = b.dataset.jump;
+  if (id === 'sort'){ if (S.e === 3) S.e = 0; startSort(Math.max(0, nextUnsorted(S.e))); }
+  else if (id === 'done'){ S.e = 3; go('done'); }
+  else { if (id === 'event' && S.screen === 'vault') S.e = 0; go(id); }
+});
+render();
+</script>
