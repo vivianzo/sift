@@ -1,8 +1,6 @@
-# Keepsake
+# Sift
 
 An iPhone app for going through photos after a concert or a trip. It groups photos into moments by time and place, stacks near-identical shots, and helps you keep the best one from each stack. Everything runs on device, and the app only stores references to photos in your library, never copies.
-
-*Keepsake is a working name.*
 
 ## Status
 

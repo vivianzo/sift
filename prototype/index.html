@@ -2,7 +2,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Keepsake Prototype</title>
+<title>Sift Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap">
@@ -417,7 +417,7 @@ const S = {screen:'home', e:0, s:0, mode:'quick', sel:new Set()};
 const img = (e, s, j, alt='') => `<img data-k="${e}-${s}-${j}" alt="${alt}">`;
 
 function home(){
-  return `<header class="top"><div class="eyebrow mono">Keepsake</div><h1 class="display">Your <em>moments</em></h1>
+  return `<header class="top"><div class="eyebrow mono">Sift</div><h1 class="display">Your <em>moments</em></h1>
     <p>2 new since Friday, grouped by when and where you took them.</p></header>
     <div class="cards">${EVENTS.map((ev, e) => {
       const t = stats(e);
@@ -504,7 +504,7 @@ function vault(){
   const total = withKeeps.reduce((a, e) => a + stats(e).kept, 0);
   const archived = EVENTS.reduce((a, _, e) => a + stats(e).archived, 0);
   const caps = ['this one', 'core memory', 'so good', 'golden hour', 'the light', 'us', 'oh wow', 'again soon'];
-  return `<header class="top"><div class="eyebrow mono">Keepsake</div><h1 class="display">The <em>vault</em></h1>
+  return `<header class="top"><div class="eyebrow mono">Sift</div><h1 class="display">The <em>vault</em></h1>
     <p>${total} favorites from ${withKeeps.length} moment${withKeeps.length===1?'':'s'}. Saved as links to your library, so they take no extra space.</p></header>
     ${withKeeps.map(e => {
       const ev = EVENTS[e], r = rng(ev.seed + 7), t = stats(e);

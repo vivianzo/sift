@@ -9,7 +9,7 @@ Labels: `setup` `design` `photos` `vision` `ui` `data`
 ## M0 · Setup
 
 ### 1. Create the Xcode project `setup`
-Create a SwiftUI iOS app named Keepsake (iOS 17+) inside `app/`.
+Create a SwiftUI iOS app named Sift (iOS 17+) inside `app/`.
 - [ ] Builds and runs on the simulator
 - [ ] Two empty tabs: Moments and Vault
 - [ ] Folders: `Models/`, `Services/`, `Views/`, `DesignSystem/`
@@ -85,7 +85,7 @@ Store moments, stacks, and picks. Store photos only as `PHAsset.localIdentifier`
 - [ ] A photo deleted in the Photos app drops out without crashing
 
 ### 14. Archive album `photos`
-Put photos you passed on into a "Keepsake Archive" album in Photos. Nothing gets deleted.
+Put photos you passed on into a "Sift Archive" album in Photos. Nothing gets deleted.
 - [ ] Needs read-write access, so update the permission screen for it
 
 ---
