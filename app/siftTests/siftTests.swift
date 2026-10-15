@@ -1,10 +1,3 @@
-//
-//  siftTests.swift
-//  siftTests
-//
-//  Created by Vivian Zou on 10/15/26.
-//
-
 import Testing
 @testable import sift
 
