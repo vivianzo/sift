@@ -12,4 +12,4 @@ Early. There is a clickable web prototype, and the iOS app hasn't been started y
 
 ## Plan
 
-SwiftUI + PhotoKit for the photo library, Vision for grouping and scoring, SwiftData for saving picks. iOS 17+.
+SwiftUI + PhotoKit for the photo library, Vision for grouping and scoring, SwiftData for saving picks. iOS 18+, iPhone only.
