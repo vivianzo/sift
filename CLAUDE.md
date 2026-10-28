@@ -14,13 +14,15 @@ app/
   sift/
     App/           app entry point
     Views/         one folder per screen (Moments/, Vault/, ...)
-    Models/        plain data types, no PhotoKit or SwiftUI
-    Services/      photo library, grouping, Vision, geocoding
-    DesignSystem/  colors, fonts, radii
+    DesignSystem/  shared components (StatusView), later colors, fonts, radii
+    Models/        (planned) plain data types, no PhotoKit or SwiftUI
+    Services/      (planned) photo library, grouping, Vision, geocoding
     Assets.xcassets
   siftTests/       unit tests (Swift Testing)
   siftUITests/
 ```
+
+Create a folder only when its first real file lands. No placeholder files.
 
 The project uses Xcode's synchronized folders, so any file placed under `app/sift/` is added to the app target automatically. Don't add `.gitkeep` or other stray files there: they get copied into the app bundle and break the build.
 
@@ -45,6 +47,7 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 
 - Types are UpperCamelCase (`SiftApp`, `MomentsView`). One main type per file, file named after it.
 - Views stay small. Move logic into models or services.
+- Use `StatusView` for empty, loading, and error screens instead of building new ones.
 - Pull colors, fonts, and radii from `DesignSystem/`, never hard-coded values (once #2 lands).
 - Keep comments short and only where the reason isn't obvious. No Xcode file header comments.
 

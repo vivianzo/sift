@@ -1,14 +1,13 @@
 import SwiftUI
 
-/// Home list of auto-grouped moments. Placeholder until #7.
 struct MomentsView: View {
     var body: some View {
         NavigationStack {
-            ContentUnavailableView(
-                "No moments yet",
+            StatusView(.empty(
+                title: "No moments yet",
                 systemImage: "photo.on.rectangle.angled",
-                description: Text("Photos you take will be grouped here by time and place.")
-            )
+                message: "Photos you take will be grouped here by time and place."
+            ))
             .navigationTitle("Moments")
         }
     }
