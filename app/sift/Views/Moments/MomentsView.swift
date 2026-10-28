@@ -10,6 +10,7 @@ struct MomentsView: View {
           message: "Photos you take will be grouped here by time and place."
         )
       )
+      .background(.canvas)
       .navigationTitle("Moments")
     }
   }

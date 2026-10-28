@@ -18,16 +18,22 @@ struct StatusView: View {
   var body: some View {
     switch status {
     case .empty(let title, let systemImage, let message):
-      ContentUnavailableView(title, systemImage: systemImage, description: Text(message))
+      ContentUnavailableView {
+        Label(title, systemImage: systemImage).font(.heading)
+      } description: {
+        Text(message).font(.bodyText).foregroundStyle(.muted)
+      }
     case .loading(let message):
-      ProgressView(message)
+      ProgressView {
+        Text(message).font(.note).foregroundStyle(.muted)
+      }
     case .failed(let message, let retry):
       ContentUnavailableView {
-        Label("Something went wrong", systemImage: "exclamationmark.triangle")
+        Label("Something went wrong", systemImage: "exclamationmark.triangle").font(.heading)
       } description: {
-        Text(message)
+        Text(message).font(.bodyText).foregroundStyle(.muted)
       } actions: {
-        Button("Try again", action: retry)
+        Button("Try again", action: retry).font(.label)
       }
     }
   }

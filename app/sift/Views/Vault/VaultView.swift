@@ -10,6 +10,7 @@ struct VaultView: View {
           message: "Photos you keep while sorting will show up here."
         )
       )
+      .background(.canvas)
       .navigationTitle("Vault")
     }
   }
