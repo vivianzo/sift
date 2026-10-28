@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# on concurrent pushes, cancel the in-progress flow
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    steps:
+      # Download the repo's code onto the runner
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+
+      # prints the Xcode version in the logs
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build and test
+        working-directory: app
+        run: xcodebuild -project sift.xcodeproj -scheme sift -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' test -only-testing:siftTests CODE_SIGNING_ALLOWED=NO
+  lint:
+    name: Lint
+    runs-on: macos-26
+    timeout-minutes: 10
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+      - name: swift format
+        run: swift format lint --strict --recursive app
