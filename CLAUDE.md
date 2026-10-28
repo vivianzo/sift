@@ -45,6 +45,7 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 
 ## Code style
 
+- Indent with 2 spaces (set in `.editorconfig` and the Xcode project).
 - Types are UpperCamelCase (`SiftApp`, `MomentsView`). One main type per file, file named after it.
 - Views stay small. Move logic into models or services.
 - Use `StatusView` for empty, loading, and error screens instead of building new ones.
