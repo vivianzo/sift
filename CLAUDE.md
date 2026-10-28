@@ -45,6 +45,7 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 
 ## Code style
 
+- Indent with 2 spaces (set in `.editorconfig` and the Xcode project).
 - Types are UpperCamelCase (`SiftApp`, `MomentsView`). One main type per file, file named after it.
 - Views stay small. Move logic into models or services.
 - Use `StatusView` for empty, loading, and error screens instead of building new ones.
@@ -54,6 +55,15 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 ## Workflow
 
 - One branch per ticket, named `<area>/<short-name>` (e.g. `setup/project-structure`).
+- PR titles follow Conventional Commits: `<type>: <summary>`, lowercase, no period (e.g. `feat: add moments list`). PRs are squash-merged, so the title becomes the commit message on `main`.
+  - `feat`: new feature or screen
+  - `fix`: bug fix
+  - `chore`: setup, config, cleanup
+  - `docs`: README, CLAUDE.md, docs/
+  - `refactor`: code change with no behavior change
+  - `test`: adding or fixing tests
+  - `ci`: GitHub Actions and other pipeline changes
+  - `style`: formatting only
 - PRs link their issue with `Closes #n` and list how the change was checked.
 - Ask before pushing to `main`, force-pushing, or rewriting history.
 

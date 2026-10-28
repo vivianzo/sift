@@ -80,7 +80,10 @@
 				7CB2A1503080887E00672513 /* siftUITests */,
 				7CB2A1373080887C00672513 /* Products */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
+			usesTabs = 0;
 		};
 		7CB2A1373080887C00672513 /* Products */ = {
 			isa = PBXGroup;
