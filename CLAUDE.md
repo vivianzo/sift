@@ -11,10 +11,12 @@ On-device iPhone app for sorting concert and trip photos down to favorites. Swif
 ```
 app/
   sift.xcodeproj
+  Info.plist       extra keys merged into the generated plist (UIAppFonts)
   sift/
     App/           app entry point
-    Views/         one folder per screen (Moments/, Vault/, ...)
-    DesignSystem/  shared components (StatusView), later colors, fonts, radii
+    Views/         one folder per screen (Moments/, Vault/, ...); RootView owns the tab navigation stacks
+    DesignSystem/  fonts, radii, shared components (StatusView)
+    Resources/     bundled files (Fonts/)
     Models/        (planned) plain data types, no PhotoKit or SwiftUI
     Services/      (planned) photo library, grouping, Vision, geocoding
     Assets.xcassets
@@ -49,7 +51,7 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 - Types are UpperCamelCase (`SiftApp`, `MomentsView`). One main type per file, file named after it.
 - Views stay small. Move logic into models or services.
 - Use `StatusView` for empty, loading, and error screens instead of building new ones.
-- Pull colors, fonts, and radii from `DesignSystem/`, never hard-coded values (once #2 lands).
+- Use the design tokens, never hard-coded values: colors from `Assets.xcassets` (`.ink`, `.canvas`, ...), fonts from `Font` (`.heading`, `.bodyText`, ...), corners from `Radius`. See `docs/design.md`.
 - Keep comments short and only where the reason isn't obvious. No Xcode file header comments.
 
 ## Workflow
