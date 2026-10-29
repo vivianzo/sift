@@ -36,7 +36,7 @@ Navy is the main color and rose is the accent. The palette is still open for ite
 | `note`          | Manrope Regular         | 12   | `.footnote`    |
 | `mono`          | DM Mono Regular         | 11   | `.caption`     |
 
-Font files and their licenses (SIL Open Font License) are in `app/sift/Resources/Fonts/`.
+Font files and their licenses (SIL Open Font License) are in `app/sift/Resources/Fonts/`. Each file must also be listed under `UIAppFonts` in `app/Info.plist`, or iOS won't load it.
 
 ## Shape
 

@@ -11,9 +11,10 @@ On-device iPhone app for sorting concert and trip photos down to favorites. Swif
 ```
 app/
   sift.xcodeproj
+  Info.plist       extra keys merged into the generated plist (UIAppFonts)
   sift/
     App/           app entry point
-    Views/         one folder per screen (Moments/, Vault/, ...)
+    Views/         one folder per screen (Moments/, Vault/, ...); RootView owns the tab navigation stacks
     DesignSystem/  fonts, radii, shared components (StatusView)
     Resources/     bundled files (Fonts/)
     Models/        (planned) plain data types, no PhotoKit or SwiftUI

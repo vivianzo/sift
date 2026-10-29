@@ -8,12 +8,10 @@ import UIKit
 struct AppFontTests {
   @Test(arguments: AppFont.allCases)
   func fontResolvesByName(font: AppFont) {
-    AppFont.registerAll()
     #expect(UIFont(name: font.rawValue, size: 12) != nil)
   }
 
   @Test func semiBoldIsHeavierThanRegular() throws {
-    AppFont.registerAll()
     let regular = try #require(UIFont(name: AppFont.sans.rawValue, size: 20))
     let semiBold = try #require(UIFont(name: AppFont.sansSemiBold.rawValue, size: 20))
     let text = "Lorde at TD Garden" as NSString
