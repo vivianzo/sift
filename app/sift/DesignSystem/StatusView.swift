@@ -4,9 +4,14 @@ import SwiftUI
 /// empty, still loading, or failed.
 struct StatusView: View {
   enum Status {
-    case empty(title: String, systemImage: String, message: String)
+    case empty(title: String, systemImage: String, message: String, action: Action? = nil)
     case loading(message: String)
     case failed(message: String, retry: () -> Void)
+  }
+
+  struct Action {
+    let title: String
+    let perform: () -> Void
   }
 
   let status: Status
@@ -17,11 +22,17 @@ struct StatusView: View {
 
   var body: some View {
     switch status {
-    case .empty(let title, let systemImage, let message):
+    case .empty(let title, let systemImage, let message, let action):
       ContentUnavailableView {
         Label(title, systemImage: systemImage).font(.heading)
       } description: {
         Text(message).font(.bodyText).foregroundStyle(.muted)
+      } actions: {
+        if let action {
+          Button(action.title, action: action.perform)
+            .font(.label)
+            .buttonStyle(.borderedProminent)
+        }
       }
     case .loading(let message):
       ProgressView {

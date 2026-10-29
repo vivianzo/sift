@@ -86,7 +86,7 @@ Store moments, stacks, and picks. Store photos only as `PHAsset.localIdentifier`
 
 ### 14. Archive album `photos`
 Put photos you passed on into a "Sift Archive" album in Photos. Nothing gets deleted.
-- [ ] Needs read-write access, so update the permission screen for it
+- [ ] Read-write access is already requested in #3, so no permission changes needed
 
 ---
 
