@@ -42,7 +42,12 @@ final class PhotoAccessUITests: XCTestCase {
 
   private func tapAlertButton(containing text: String) {
     let button = springboard.alerts.buttons.matching(NSPredicate(format: "label CONTAINS %@", text)).firstMatch
-    XCTAssertTrue(button.waitForExistence(timeout: 5), "No permission prompt button containing \"\(text)\"")
-    button.tap()
+    XCTAssertTrue(button.waitForExistence(timeout: 10), "No permission prompt button containing \"\(text)\"")
+    // The prompt fades in, and a tap during the animation is dropped. Retry until it closes.
+    for _ in 0..<5 where button.exists {
+      if button.isHittable { button.tap() }
+      _ = button.waitForNonExistence(timeout: 2)
+    }
+    XCTAssertFalse(button.exists, "Permission prompt didn't close after tapping \"\(text)\"")
   }
 }

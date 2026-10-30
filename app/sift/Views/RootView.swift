@@ -1,9 +1,10 @@
+import Photos
 import SwiftUI
 
 /// The two top-level tabs: Moments (sorting) and Vault (favorites).
 /// Until Sift can read photos, shows the photo access screen instead.
 struct RootView: View {
-  @State private var access = PhotoAccess.current
+  @State private var access = PhotoLibraryAccess.status
   @Environment(\.scenePhase) private var scenePhase
 
   var body: some View {
@@ -11,15 +12,15 @@ struct RootView: View {
       if access.canReadPhotos {
         tabs
       } else {
-        PhotoAccessView(access: access) {
-          Task { access = await PhotoAccess.request() }
+        PhotoAccessView(status: access) {
+          Task { access = await PhotoLibraryAccess.request() }
         }
       }
     }
     // Access can change in Settings while the app is in the background.
     .onChange(of: scenePhase) { _, phase in
       if phase == .active {
-        access = PhotoAccess.current
+        access = PhotoLibraryAccess.status
       }
     }
   }
@@ -30,7 +31,13 @@ struct RootView: View {
         tabRoot { MomentsView() }
           .safeAreaInset(edge: .bottom) {
             if access == .limited {
-              LimitedAccessBanner()
+              Banner(
+                systemImage: "photo.badge.exclamationmark",
+                message: "Sift can only see the photos you selected.",
+                callToAction: .init(title: "Allow all", perform: PhotoLibraryAccess.openSettings)
+              )
+              .padding(.horizontal, 16)
+              .padding(.bottom, 8)
             }
           }
       }
