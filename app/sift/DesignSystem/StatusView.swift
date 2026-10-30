@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// Full-screen message for when a screen has nothing to show yet:
-/// empty, still loading, or failed.
+/// Full-screen state for a screen that has no content to show yet.
 struct StatusView: View {
   enum Status {
-    case empty(title: String, systemImage: String, message: String)
+    /// A title and explanation, with an optional button. For empty screens,
+    /// permission screens, and anything else that tells the user what to do next.
+    case message(title: String, systemImage: String, message: String, callToAction: CallToAction? = nil)
     case loading(message: String)
     case failed(message: String, retry: () -> Void)
   }
@@ -17,11 +18,17 @@ struct StatusView: View {
 
   var body: some View {
     switch status {
-    case .empty(let title, let systemImage, let message):
+    case .message(let title, let systemImage, let message, let callToAction):
       ContentUnavailableView {
         Label(title, systemImage: systemImage).font(.heading)
       } description: {
         Text(message).font(.bodyText).foregroundStyle(.muted)
+      } actions: {
+        if let callToAction {
+          Button(callToAction.title, action: callToAction.perform)
+            .font(.label)
+            .buttonStyle(.borderedProminent)
+        }
       }
     case .loading(let message):
       ProgressView {
@@ -39,8 +46,19 @@ struct StatusView: View {
   }
 }
 
-#Preview("Empty") {
-  StatusView(.empty(title: "Nothing here", systemImage: "photo", message: "Photos will show up here."))
+#Preview("Message") {
+  StatusView(.message(title: "Nothing here", systemImage: "photo", message: "Photos will show up here."))
+}
+
+#Preview("Message with button") {
+  StatusView(
+    .message(
+      title: "Photo access is off",
+      systemImage: "lock",
+      message: "Turn on photo access in Settings.",
+      callToAction: .init(title: "Open Settings", perform: {})
+    )
+  )
 }
 
 #Preview("Loading") {

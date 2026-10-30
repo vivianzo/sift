@@ -11,17 +11,17 @@ On-device iPhone app for sorting concert and trip photos down to favorites. Swif
 ```
 app/
   sift.xcodeproj
-  Info.plist       extra keys merged into the generated plist (UIAppFonts)
+  Info.plist       extra keys merged into the generated plist (UIAppFonts, photo usage string)
   sift/
     App/           app entry point
     Views/         one folder per screen (Moments/, Vault/, ...); RootView owns the tab navigation stacks
-    DesignSystem/  fonts, radii, shared components (StatusView)
+    DesignSystem/  fonts, radii, shared components (StatusView, Banner, CallToAction)
     Resources/     bundled files (Fonts/)
     Models/        (planned) plain data types, no PhotoKit or SwiftUI
-    Services/      (planned) photo library, grouping, Vision, geocoding
+    Services/      photo library access (PhotoLibraryAccess), later grouping, Vision, geocoding
     Assets.xcassets
   siftTests/       unit tests (Swift Testing)
-  siftUITests/
+  siftUITests/     UI tests, e.g. the photo permission flow (not run in CI)
 ```
 
 Create a folder only when its first real file lands. No placeholder files.
@@ -35,6 +35,14 @@ cd app
 xcodebuild -project sift.xcodeproj -scheme sift -destination 'platform=iOS Simulator,name=iPhone 17' build CODE_SIGNING_ALLOWED=NO
 xcodebuild -project sift.xcodeproj -scheme sift -destination 'platform=iOS Simulator,name=iPhone 17' test -only-testing:siftTests CODE_SIGNING_ALLOWED=NO
 ```
+
+UI tests (slower, run when touching the photo permission flow):
+
+```
+xcodebuild -project sift.xcodeproj -scheme sift -destination 'platform=iOS Simulator,name=iPhone 17' test -only-testing:siftUITests CODE_SIGNING_ALLOWED=NO
+```
+
+`xcrun simctl privacy grant photos` doesn't give the read-write access Sift checks, so test permission states through the UI tests instead.
 
 Build before saying a change works. Run the unit tests when touching `Models/` or `Services/`.
 
@@ -50,7 +58,8 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 - Indent with 2 spaces (set in `.editorconfig` and the Xcode project).
 - Types are UpperCamelCase (`SiftApp`, `MomentsView`). One main type per file, file named after it.
 - Views stay small. Move logic into models or services.
-- Use `StatusView` for empty, loading, and error screens instead of building new ones.
+- Use `StatusView` for full-screen states (`.message`, `.loading`, `.failed`) and `Banner` for one-line notices instead of building new ones. Buttons on either are a `CallToAction`.
+- Use Apple's types directly when they already say what we need (e.g. `PHAuthorizationStatus`); add a small extension instead of wrapping them in our own enum.
 - Use the design tokens, never hard-coded values: colors from `Assets.xcassets` (`.ink`, `.canvas`, ...), fonts from `Font` (`.heading`, `.bodyText`, ...), corners from `Radius`. See `docs/design.md`.
 - Keep comments short and only where the reason isn't obvious. No Xcode file header comments.
 
