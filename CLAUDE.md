@@ -46,6 +46,12 @@ xcodebuild -project sift.xcodeproj -scheme sift -destination 'platform=iOS Simul
 
 Build before saying a change works. Run the unit tests when touching `Models/` or `Services/`.
 
+## Dev simulator
+
+`scripts/seed-simulator.sh` sets up a separate "Sift Dev iPhone" simulator with a known photo library: a concert, a brunch, a beach sunset, a 3-day Lisbon trip, photos with no location, and a set older than 30 days. Each one is taken in bursts of near-identical shots, with some blurry ones. It prints the moments the app should find. Dates are relative to today, and running it again erases and reseeds, so the library is always the same. Add `--bulk 1200` for scroll testing.
+
+Use it for anything that depends on photo content (grouping, naming, stacks). Pick "Sift Dev iPhone" as the run destination, or pass `-destination 'platform=iOS Simulator,name=Sift Dev iPhone'`. To change the scenarios, edit `scripts/SeedPhotos.swift`.
+
 ## Product rules
 
 - Everything runs on device. No network calls, no accounts, no analytics.
