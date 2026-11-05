@@ -6,12 +6,14 @@ import SwiftUI
 struct RootView: View {
   @State private var access = PhotoLibraryAccess.status
   @Environment(\.scenePhase) private var scenePhase
+  @Environment(\.openURL) private var openURL
 
   var body: some View {
     Group {
-      if access.canReadPhotos {
+      switch access {
+      case .authorized, .limited:
         tabs
-      } else {
+      default:
         PhotoAccessView(status: access) {
           Task { access = await PhotoLibraryAccess.request() }
         }
@@ -34,7 +36,7 @@ struct RootView: View {
               Banner(
                 systemImage: "photo.badge.exclamationmark",
                 message: "Sift can only see the photos you selected.",
-                callToAction: .init(title: "Allow all", perform: PhotoLibraryAccess.openSettings)
+                button: ("Allow all", openSettings)
               )
               .padding(.horizontal, 16)
               .padding(.bottom, 8)
@@ -44,6 +46,12 @@ struct RootView: View {
       Tab("Vault", systemImage: "heart.text.square") {
         tabRoot { VaultView() }
       }
+    }
+  }
+
+  private func openSettings() {
+    if let url = URL(string: UIApplication.openSettingsURLString) {
+      openURL(url)
     }
   }
 

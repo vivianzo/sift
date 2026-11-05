@@ -15,7 +15,7 @@ app/
   sift/
     App/           app entry point
     Views/         one folder per screen (Moments/, Vault/, ...); RootView owns the tab navigation stacks
-    DesignSystem/  fonts, radii, shared components (StatusView, Banner, CallToAction)
+    DesignSystem/  fonts, radii, shared components (StatusView, Banner)
     Resources/     bundled files (Fonts/)
     Models/        (planned) plain data types, no PhotoKit or SwiftUI
     Services/      photo library access (PhotoLibraryAccess), later grouping, Vision, geocoding
@@ -58,8 +58,9 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 - Indent with 2 spaces (set in `.editorconfig` and the Xcode project).
 - Types are UpperCamelCase (`SiftApp`, `MomentsView`). One main type per file, file named after it.
 - Views stay small. Move logic into models or services.
-- Use `StatusView` for full-screen states (`.message`, `.loading`, `.failed`) and `Banner` for one-line notices instead of building new ones. Buttons on either are a `CallToAction`.
-- Use Apple's types directly when they already say what we need (e.g. `PHAuthorizationStatus`); add a small extension instead of wrapping them in our own enum.
+- Use `StatusView` for full-screen states (`.message`, `.loading`, `.failed`) and `Banner` for one-line notices instead of building new ones. Both take an optional `button: (title, action)`.
+- Use Apple's types and SwiftUI's built-ins directly (e.g. `PHAuthorizationStatus`, the `openURL` environment value) instead of wrapping them.
+- Don't add a helper, extension, or shared type until it's needed in more than one place. A one-line check used once stays inline.
 - Use the design tokens, never hard-coded values: colors from `Assets.xcassets` (`.ink`, `.canvas`, ...), fonts from `Font` (`.heading`, `.bodyText`, ...), corners from `Radius`. See `docs/design.md`.
 - Keep comments short and only where the reason isn't obvious. No Xcode file header comments.
 

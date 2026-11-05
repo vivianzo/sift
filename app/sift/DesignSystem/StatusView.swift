@@ -3,9 +3,8 @@ import SwiftUI
 /// Full-screen state for a screen that has no content to show yet.
 struct StatusView: View {
   enum Status {
-    /// A title and explanation, with an optional button. For empty screens,
-    /// permission screens, and anything else that tells the user what to do next.
-    case message(title: String, systemImage: String, message: String, callToAction: CallToAction? = nil)
+    case message(
+      title: String, systemImage: String, message: String, button: (title: String, action: () -> Void)? = nil)
     case loading(message: String)
     case failed(message: String, retry: () -> Void)
   }
@@ -18,14 +17,14 @@ struct StatusView: View {
 
   var body: some View {
     switch status {
-    case .message(let title, let systemImage, let message, let callToAction):
+    case .message(let title, let systemImage, let message, let button):
       ContentUnavailableView {
         Label(title, systemImage: systemImage).font(.heading)
       } description: {
         Text(message).font(.bodyText).foregroundStyle(.muted)
       } actions: {
-        if let callToAction {
-          Button(callToAction.title, action: callToAction.perform)
+        if let button {
+          Button(button.title, action: button.action)
             .font(.label)
             .buttonStyle(.borderedProminent)
         }
@@ -56,7 +55,7 @@ struct StatusView: View {
       title: "Photo access is off",
       systemImage: "lock",
       message: "Turn on photo access in Settings.",
-      callToAction: .init(title: "Open Settings", perform: {})
+      button: ("Open Settings", {})
     )
   )
 }

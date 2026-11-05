@@ -1,11 +1,9 @@
 import SwiftUI
 
-/// A one-line notice with an optional button, e.g. "Sift can only see the photos you selected."
-/// The caller decides where it goes and adds outer padding.
 struct Banner: View {
   let systemImage: String
   let message: String
-  var callToAction: CallToAction? = nil
+  var button: (title: String, action: () -> Void)? = nil
 
   var body: some View {
     HStack(spacing: 12) {
@@ -15,8 +13,8 @@ struct Banner: View {
         .font(.note)
         .foregroundStyle(.muted)
         .frame(maxWidth: .infinity, alignment: .leading)
-      if let callToAction {
-        Button(callToAction.title, action: callToAction.perform)
+      if let button {
+        Button(button.title, action: button.action)
           .font(.label)
       }
     }
@@ -32,7 +30,7 @@ struct Banner: View {
     Banner(
       systemImage: "photo.badge.exclamationmark",
       message: "Sift can only see the photos you selected.",
-      callToAction: .init(title: "Allow all", perform: {})
+      button: ("Allow all", {})
     )
   }
   .padding(16)

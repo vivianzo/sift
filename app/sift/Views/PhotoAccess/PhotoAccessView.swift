@@ -6,6 +6,8 @@ struct PhotoAccessView: View {
   let status: PHAuthorizationStatus
   let onRequest: () -> Void
 
+  @Environment(\.openURL) private var openURL
+
   var body: some View {
     Group {
       switch status {
@@ -15,7 +17,7 @@ struct PhotoAccessView: View {
             title: "See your photos in Sift",
             systemImage: "photo.on.rectangle.angled",
             message: "Sift groups your photos into moments by time and place. Everything stays on your iPhone.",
-            callToAction: .init(title: "Allow photo access", perform: onRequest)
+            button: ("Allow photo access", onRequest)
           )
         )
       case .restricted:
@@ -44,9 +46,15 @@ struct PhotoAccessView: View {
         title: "Photo access is off",
         systemImage: "lock",
         message: "Turn on photo access in Settings so Sift can group your photos.",
-        callToAction: .init(title: "Open Settings", perform: PhotoLibraryAccess.openSettings)
+        button: ("Open Settings", openSettings)
       )
     )
+  }
+
+  private func openSettings() {
+    if let url = URL(string: UIApplication.openSettingsURLString) {
+      openURL(url)
+    }
   }
 }
 
