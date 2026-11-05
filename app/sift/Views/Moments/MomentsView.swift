@@ -3,7 +3,7 @@ import SwiftUI
 struct MomentsView: View {
   var body: some View {
     StatusView(
-      .empty(
+      .message(
         title: "No moments yet",
         systemImage: "photo.on.rectangle.angled",
         message: "Photos you take will be grouped here by time and place."
