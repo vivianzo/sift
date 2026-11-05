@@ -3,21 +3,18 @@ import SwiftUI
 
 /// Shown instead of the app while Sift can't read any photos.
 struct PhotoAccessView: View {
-  let status: PHAuthorizationStatus
-  let onRequest: () -> Void
-
-  @Environment(\.openURL) private var openURL
+  @Environment(PhotoLibraryAccess.self) private var photoAccess
 
   var body: some View {
     Group {
-      switch status {
+      switch photoAccess.status {
       case .notDetermined:
         StatusView(
           .message(
             title: "See your photos in Sift",
             systemImage: "photo.on.rectangle.angled",
             message: "Sift groups your photos into moments by time and place. Everything stays on your iPhone.",
-            button: ("Allow photo access", onRequest)
+            button: ("Allow photo access", { Task { await photoAccess.request() } })
           )
         )
       case .restricted:
@@ -46,26 +43,23 @@ struct PhotoAccessView: View {
         title: "Photo access is off",
         systemImage: "lock",
         message: "Turn on photo access in Settings so Sift can group your photos.",
-        button: ("Open Settings", openSettings)
+        button: ("Open Settings", photoAccess.openSettings)
       )
     )
-  }
-
-  private func openSettings() {
-    if let url = URL(string: UIApplication.openSettingsURLString) {
-      openURL(url)
-    }
   }
 }
 
 #Preview("Not asked yet") {
-  PhotoAccessView(status: .notDetermined, onRequest: {})
+  PhotoAccessView()
+    .environment(PhotoLibraryAccess(status: .notDetermined))
 }
 
 #Preview("Denied") {
-  PhotoAccessView(status: .denied, onRequest: {})
+  PhotoAccessView()
+    .environment(PhotoLibraryAccess(status: .denied))
 }
 
 #Preview("Restricted") {
-  PhotoAccessView(status: .restricted, onRequest: {})
+  PhotoAccessView()
+    .environment(PhotoLibraryAccess(status: .restricted))
 }

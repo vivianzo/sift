@@ -18,7 +18,7 @@ app/
     DesignSystem/  fonts, radii, shared components (StatusView, Banner)
     Resources/     bundled files (Fonts/)
     Models/        (planned) plain data types, no PhotoKit or SwiftUI
-    Services/      photo library access (PhotoLibraryAccess), later grouping, Vision, geocoding
+    Services/      @Observable models for system work: photo library access (PhotoLibraryAccess), later grouping, Vision, geocoding
     Assets.xcassets
   siftTests/       unit tests (Swift Testing)
   siftUITests/     UI tests, e.g. the photo permission flow (not run in CI)
@@ -57,9 +57,9 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 
 - Indent with 2 spaces (set in `.editorconfig` and the Xcode project).
 - Types are UpperCamelCase (`SiftApp`, `MomentsView`). One main type per file, file named after it.
-- Views stay small. Move logic into models or services.
+- Views only lay out and forward taps. They don't call system APIs (PhotoKit, Settings, ...) or hold logic. App-wide state and the actions on it live in an `@Observable` model in `Services/`, created once in `SiftApp` and read with `@Environment(Model.self)` (e.g. `PhotoLibraryAccess`).
 - Use `StatusView` for full-screen states (`.message`, `.loading`, `.failed`) and `Banner` for one-line notices instead of building new ones. Both take an optional `button: (title, action)`.
-- Use Apple's types and SwiftUI's built-ins directly (e.g. `PHAuthorizationStatus`, the `openURL` environment value) instead of wrapping them.
+- Use Apple's types directly (e.g. `PHAuthorizationStatus`) instead of wrapping them in our own.
 - Don't add a helper, extension, or shared type until it's needed in more than one place. A one-line check used once stays inline.
 - Use the design tokens, never hard-coded values: colors from `Assets.xcassets` (`.ink`, `.canvas`, ...), fonts from `Font` (`.heading`, `.bodyText`, ...), corners from `Radius`. See `docs/design.md`.
 - Keep comments short and only where the reason isn't obvious. No Xcode file header comments.
