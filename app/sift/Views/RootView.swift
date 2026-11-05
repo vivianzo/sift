@@ -5,7 +5,7 @@ import SwiftUI
 /// Until Sift can read photos, shows the photo access screen instead.
 struct RootView: View {
   @Environment(PhotoLibraryAccess.self) private var photoAccess
-  @Environment(\.scenePhase) private var scenePhase
+  @Environment(PhotoLibrary.self) private var photoLibrary
 
   var body: some View {
     Group {
@@ -16,11 +16,14 @@ struct RootView: View {
         PhotoAccessView()
       }
     }
-    // Access can change in Settings while the app is in the background.
-    .onChange(of: scenePhase) { _, phase in
-      if phase == .active {
-        photoAccess.refresh()
-      }
+    .task(id: photoAccess.status) {
+      loadPhotosIfAllowed()
+    }
+    // Access and photos can both change while the app is in the background, e.g. in Settings.
+    // Unlike `scenePhase`, this doesn't fire at launch or after the permission prompt.
+    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+      photoAccess.refresh()
+      loadPhotosIfAllowed()
     }
   }
 
@@ -46,6 +49,12 @@ struct RootView: View {
     }
   }
 
+  private func loadPhotosIfAllowed() {
+    if photoAccess.status == .authorized || photoAccess.status == .limited {
+      photoLibrary.loadRecent()
+    }
+  }
+
   // SwiftUI doesn't carry this background over to pushed screens, so those set their own.
   private func tabRoot(@ViewBuilder _ content: () -> some View) -> some View {
     NavigationStack {
@@ -57,4 +66,5 @@ struct RootView: View {
 #Preview {
   RootView()
     .environment(PhotoLibraryAccess())
+    .environment(PhotoLibrary())
 }
