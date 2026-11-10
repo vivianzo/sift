@@ -1,0 +1,14 @@
+{
+  "description": "Few moments, lots of bursts and blurry shots. For stacks (#8) and best-guess picks (#10).",
+  "expected": [
+    "3 moments",
+    "Concert: 20 stacks of 3–8 shots, about a third of shots blurry",
+    "Portraits: 10 stacks of 4–7 shots, a few blurry",
+    "Walk: 12 single photos that match nothing"
+  ],
+  "scenarios": [
+    { "name": "Concert, front row", "timeZone": "America/New_York", "latitude": 42.3662, "longitude": -71.0621, "daysAgo": 2, "start": "20:30", "minutes": 150, "bursts": 20, "hue": 0.80, "burstSize": [3, 8], "blurryRate": 0.35 },
+    { "name": "Portraits in the Public Garden", "timeZone": "America/New_York", "latitude": 42.3541, "longitude": -71.0700, "daysAgo": 6, "start": "16:00", "minutes": 40, "bursts": 10, "hue": 0.30, "burstSize": [4, 7], "blurryRate": 0.15 },
+    { "name": "Walk along the Esplanade", "timeZone": "America/New_York", "latitude": 42.3560, "longitude": -71.0800, "daysAgo": 11, "start": "10:00", "minutes": 80, "bursts": 12, "hue": 0.55, "burstSize": [1, 1] }
+  ]
+}

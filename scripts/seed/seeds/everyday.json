@@ -1,0 +1,18 @@
+{
+  "description": "A normal month: a concert, brunch, a beach sunset, a 3-day trip, photos with no location.",
+  "expected": [
+    "7 moments in the last 30 days",
+    "Lisbon is 3 moments, one per day, split by the overnight gaps",
+    "The summer picnic is older than 30 days and doesn't show up"
+  ],
+  "scenarios": [
+    { "name": "Concert at TD Garden", "timeZone": "America/New_York", "latitude": 42.3662, "longitude": -71.0621, "daysAgo": 5, "start": "20:12", "minutes": 172, "bursts": 8, "hue": 0.78 },
+    { "name": "Brunch on Beacon Hill", "timeZone": "America/New_York", "latitude": 42.3581, "longitude": -71.0707, "daysAgo": 3, "start": "11:20", "minutes": 45, "bursts": 5, "hue": 0.09 },
+    { "name": "Sunset at Revere Beach", "timeZone": "America/New_York", "latitude": 42.4085, "longitude": -70.9915, "daysAgo": 9, "start": "18:31", "minutes": 31, "bursts": 4, "hue": 0.03 },
+    { "name": "Lisbon day 1", "timeZone": "Europe/Lisbon", "latitude": 38.7107, "longitude": -9.1366, "daysAgo": 20, "start": "10:04", "minutes": 540, "bursts": 7, "hue": 0.12 },
+    { "name": "Lisbon day 2", "timeZone": "Europe/Lisbon", "latitude": 38.7114, "longitude": -9.1300, "daysAgo": 19, "start": "09:40", "minutes": 560, "bursts": 7, "hue": 0.55 },
+    { "name": "Lisbon day 3", "timeZone": "Europe/Lisbon", "latitude": 38.6916, "longitude": -9.2160, "daysAgo": 18, "start": "10:15", "minutes": 480, "bursts": 6, "hue": 0.33 },
+    { "name": "At home, no location", "timeZone": "America/New_York", "daysAgo": 1, "start": "21:00", "minutes": 30, "bursts": 3, "hue": 0.65 },
+    { "name": "Summer picnic (older than 30 days)", "timeZone": "America/New_York", "latitude": 42.3550, "longitude": -71.0656, "daysAgo": 45, "start": "13:00", "minutes": 60, "bursts": 3, "hue": 0.25 }
+  ]
+}

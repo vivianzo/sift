@@ -1,0 +1,9 @@
+{
+  "description": "Nothing in the last 30 days, only older photos. For the empty state.",
+  "expected": [
+    "No moments: Moments shows \"No moments yet\""
+  ],
+  "scenarios": [
+    { "name": "Old trip (older than 30 days)", "timeZone": "America/New_York", "latitude": 42.3550, "longitude": -71.0656, "daysAgo": 50, "start": "12:00", "minutes": 60, "bursts": 4, "hue": 0.40 }
+  ]
+}
