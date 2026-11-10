@@ -1,55 +1,44 @@
-// Generates sample photos for the dev simulator. Run through scripts/seed-simulator.sh.
+// Generates sample photos from a seed file. Run through scripts/seed-simulator.sh.
 //
-// Usage: swift SeedPhotos.swift <output-dir> [bulk-count]
+// Usage:
+//   swift generate.swift <seed.json> <output-dir> [bulk-count]
+//   swift generate.swift --list <seeds-dir>
 //
-// Each scenario is a moment the app should find: photos close in time and place,
+// A seed file lists scenarios. Each scenario is a group of photos close in time and place,
 // taken in bursts of near-identical shots a few seconds apart, with some blurry ones.
-// Dates are relative to today so the moments always fall inside Sift's 30-day window
-// (except "Summer picnic", which is meant to fall outside it).
+// Dates are relative to today so the library always lands in the same spot of Sift's
+// 30-day window. The same seed file always produces the same photos.
 
 import CoreGraphics
 import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-struct Scenario {
+struct Seed: Decodable {
+  let description: String
+  /// What the app should find, printed after generating. Useful when checking grouping.
+  let expected: [String]
+  let scenarios: [Scenario]
+}
+
+struct Scenario: Decodable {
   let name: String
   let timeZone: String
-  /// nil for photos without a location, like screenshots or location services turned off.
-  let coordinate: (latitude: Double, longitude: Double)?
+  /// Leave both out for photos without a location.
+  let latitude: Double?
+  let longitude: Double?
   let daysAgo: Int
-  let start: (hour: Int, minute: Int)
+  /// Local time in `timeZone`, "HH:mm".
+  let start: String
+  /// Time from the first burst to the last.
   let minutes: Int
   let bursts: Int
   let hue: Double
+  /// Shots per burst, picked at random in this range. Defaults to 1–5.
+  let burstSize: [Int]?
+  /// Chance that a shot in a burst of 3 or more is blurry. Defaults to 0.25.
+  let blurryRate: Double?
 }
-
-let scenarios = [
-  Scenario(
-    name: "Concert at TD Garden", timeZone: "America/New_York", coordinate: (42.3662, -71.0621),
-    daysAgo: 5, start: (20, 12), minutes: 172, bursts: 8, hue: 0.78),
-  Scenario(
-    name: "Brunch on Beacon Hill", timeZone: "America/New_York", coordinate: (42.3581, -71.0707),
-    daysAgo: 3, start: (11, 20), minutes: 45, bursts: 5, hue: 0.09),
-  Scenario(
-    name: "Sunset at Revere Beach", timeZone: "America/New_York", coordinate: (42.4085, -70.9915),
-    daysAgo: 9, start: (18, 31), minutes: 31, bursts: 4, hue: 0.03),
-  Scenario(
-    name: "Lisbon day 1", timeZone: "Europe/Lisbon", coordinate: (38.7107, -9.1366),
-    daysAgo: 20, start: (10, 4), minutes: 540, bursts: 7, hue: 0.12),
-  Scenario(
-    name: "Lisbon day 2", timeZone: "Europe/Lisbon", coordinate: (38.7114, -9.1300),
-    daysAgo: 19, start: (9, 40), minutes: 560, bursts: 7, hue: 0.55),
-  Scenario(
-    name: "Lisbon day 3", timeZone: "Europe/Lisbon", coordinate: (38.6916, -9.2160),
-    daysAgo: 18, start: (10, 15), minutes: 480, bursts: 6, hue: 0.33),
-  Scenario(
-    name: "At home, no location", timeZone: "America/New_York", coordinate: nil,
-    daysAgo: 1, start: (21, 0), minutes: 30, bursts: 3, hue: 0.65),
-  Scenario(
-    name: "Summer picnic (older than 30 days)", timeZone: "America/New_York", coordinate: (42.3550, -71.0656),
-    daysAgo: 45, start: (13, 0), minutes: 60, bursts: 3, hue: 0.25),
-]
 
 /// Same seed, same sequence, so every run produces the same library.
 struct SeededRandom {
@@ -61,12 +50,38 @@ struct SeededRandom {
 }
 
 let arguments = CommandLine.arguments
-guard arguments.count >= 2 else {
-  print("Usage: swift SeedPhotos.swift <output-dir> [bulk-count]")
+let usage =
+  "Usage: swift generate.swift <seed.json> <output-dir> [bulk-count]\n       swift generate.swift --list <seeds-dir>"
+
+func loadSeed(_ url: URL) throws -> Seed {
+  try JSONDecoder().decode(Seed.self, from: Data(contentsOf: url))
+}
+
+if arguments.count == 3, arguments[1] == "--list" {
+  let directory = URL(fileURLWithPath: arguments[2])
+  let files = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+    .filter { $0.pathExtension == "json" }
+    .sorted { $0.lastPathComponent < $1.lastPathComponent }
+  for file in files {
+    let name = file.deletingPathExtension().lastPathComponent
+    print("  \(name.padding(toLength: 12, withPad: " ", startingAt: 0)) \(try loadSeed(file).description)")
+  }
+  exit(0)
+}
+
+guard arguments.count >= 3 else {
+  print(usage)
   exit(1)
 }
-let outputDirectory = URL(fileURLWithPath: arguments[1])
-let bulkCount = arguments.count > 2 ? Int(arguments[2]) ?? 0 : 0
+let seed: Seed
+do {
+  seed = try loadSeed(URL(fileURLWithPath: arguments[1]))
+} catch {
+  print("Couldn't read \(arguments[1]): \(error)")
+  exit(1)
+}
+let outputDirectory = URL(fileURLWithPath: arguments[2])
+let bulkCount = arguments.count > 3 ? Int(arguments[3]) ?? 0 : 0
 
 let width = 1200
 let height = 900
@@ -157,27 +172,35 @@ func write(
 
 var random = SeededRandom(state: 2026)
 var total = 0
-print("Moments the app should find:")
-for (index, scenario) in scenarios.enumerated() {
-  let timeZone = TimeZone(identifier: scenario.timeZone)!
+for (index, scenario) in seed.scenarios.enumerated() {
+  guard let timeZone = TimeZone(identifier: scenario.timeZone) else {
+    print("Unknown time zone \"\(scenario.timeZone)\" in \(scenario.name)")
+    exit(1)
+  }
   var calendar = Calendar(identifier: .gregorian)
   calendar.timeZone = timeZone
+  let parts = scenario.start.split(separator: ":").compactMap { Int($0) }
   let day = calendar.date(byAdding: .day, value: -scenario.daysAgo, to: calendar.startOfDay(for: .now))!
-  let start = calendar.date(bySettingHour: scenario.start.hour, minute: scenario.start.minute, second: 0, of: day)!
+  let start = calendar.date(bySettingHour: parts[0], minute: parts[1], second: 0, of: day)!
+  let place = scenario.latitude.flatMap { lat in scenario.longitude.map { (latitude: lat, longitude: $0) } }
+  let sizeRange = scenario.burstSize ?? [1, 5]
+  let blurryRate = scenario.blurryRate ?? 0.25
 
   var shots = 0
   for burst in 0..<scenario.bursts {
-    let burstStart = start.addingTimeInterval(Double(scenario.minutes * 60) * Double(burst) / Double(scenario.bursts))
+    let step = scenario.bursts > 1 ? Double(scenario.minutes * 60) / Double(scenario.bursts - 1) : 0
+    let burstStart = start.addingTimeInterval(step * Double(burst))
     // Wander a little within the place (up to ~300 m) so locations aren't identical.
-    let coordinate = scenario.coordinate.map {
+    let coordinate = place.map {
       (latitude: $0.latitude + (random.next() - 0.5) * 0.005, longitude: $0.longitude + (random.next() - 0.5) * 0.005)
     }
-    let burstSize = 1 + Int(random.next() * 5)
-    let seed = UInt64(index * 1000 + burst + 1)
+    let burstSize = sizeRange[0] + Int(random.next() * Double(sizeRange[1] - sizeRange[0] + 1))
+    let compositionSeed = UInt64(index * 1000 + burst + 1)
     for shot in 0..<burstSize {
       let date = burstStart.addingTimeInterval(Double(shot) * (1 + random.next() * 2))
-      let blurry = burstSize > 2 && random.next() < 0.25
-      let image = drawShot(hue: scenario.hue, compositionSeed: seed, shift: CGFloat(shot) * 14, blurry: blurry)
+      let blurry = burstSize > 2 && random.next() < blurryRate
+      let image = drawShot(
+        hue: scenario.hue, compositionSeed: compositionSeed, shift: CGFloat(shot) * 14, blurry: blurry)
       let name = String(format: "seed-%02d-b%02d-s%d%@.jpg", index, burst, shot, blurry ? "-blurry" : "")
       write(image, named: name, date: date, timeZone: timeZone, coordinate: coordinate)
       shots += 1
@@ -186,11 +209,11 @@ for (index, scenario) in scenarios.enumerated() {
   total += shots
   var style = Date.FormatStyle.dateTime.month(.abbreviated).day().hour().minute().timeZone()
   style.timeZone = timeZone
-  print("  \(scenario.name): \(shots) photos in \(scenario.bursts) bursts, starting \(start.formatted(style))")
+  print("  \(scenario.name): \(shots) photos in \(scenario.bursts) bursts, from \(start.formatted(style))")
 }
 
 // Filler for scroll testing: one photo per minute from midnight 27 days ago, no location.
-// That day has no scenario, so the filler doesn't merge into another moment.
+// No seed uses that day, so the filler doesn't merge into another moment.
 let fillerStart = Calendar.current.date(byAdding: .day, value: -27, to: Calendar.current.startOfDay(for: .now))!
 for i in 0..<bulkCount {
   let date = fillerStart.addingTimeInterval(Double(i) * 60)
@@ -201,3 +224,9 @@ if bulkCount > 0 {
   print("  Plus \(bulkCount) filler photos, one a minute starting 27 days ago (no location).")
 }
 print("Wrote \(total + bulkCount) photos.")
+if !seed.expected.isEmpty {
+  print("The app should find:")
+  for line in seed.expected {
+    print("  - \(line)")
+  }
+}

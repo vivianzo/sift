@@ -48,9 +48,18 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 
 ## Dev simulator
 
-`scripts/seed-simulator.sh` sets up a separate "Sift Dev iPhone" simulator with a known photo library: a concert, a brunch, a beach sunset, a 3-day Lisbon trip, photos with no location, and a set older than 30 days. Each one is taken in bursts of near-identical shots, with some blurry ones. It prints the moments the app should find. Dates are relative to today, and running it again erases and reseeds, so the library is always the same. Add `--bulk 1200` for scroll testing.
+`scripts/seed-simulator.sh [seed]` sets up a separate "Sift Dev iPhone" simulator with a known photo library. Running it again erases and reseeds, and dates are relative to today, so the library is always the same. It prints what the app should find.
 
-Use it for anything that depends on photo content (grouping, naming, stacks). Pick "Sift Dev iPhone" as the run destination, or pass `-destination 'platform=iOS Simulator,name=Sift Dev iPhone'`. To change the scenarios, edit `scripts/SeedPhotos.swift`.
+Seeds live in `scripts/seed/seeds/`, one JSON file each (`--list` shows them):
+
+- `everyday` (default): a normal month, with a concert, brunch, beach sunset, 3-day trip, and photos with no location
+- `stacks`: few moments with lots of bursts and blurry shots, for stacks and best-guess picks
+- `edge-cases`: grouping boundaries (gaps near 90 minutes, moving over 1 km, midnight, travel, missing locations)
+- `empty`: nothing in the last 30 days, for the empty state
+
+Add `--bulk 1200` to any seed for scroll testing. To add a variation, copy a seed file and edit its scenarios. `scripts/seed/generate.swift` turns a seed file into photos with real dates and GPS.
+
+Pick "Sift Dev iPhone" as the run destination, or pass `-destination 'platform=iOS Simulator,name=Sift Dev iPhone'`.
 
 ## Product rules
 

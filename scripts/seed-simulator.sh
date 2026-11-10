@@ -1,26 +1,37 @@
 #!/usr/bin/env bash
-# Sets up a "Sift Dev iPhone" simulator with sample photos, so you can test with a realistic
-# library without touching your normal simulator. Running it again erases and reseeds the
-# dev simulator, so the library is always the same.
+# Sets up a "Sift Dev iPhone" simulator with sample photos from a seed, so you can test with a
+# known library without touching your normal simulator. Running it again erases and reseeds
+# the dev simulator, so the library is always the same.
 #
-# Usage: scripts/seed-simulator.sh [--bulk N]
+# Usage: scripts/seed-simulator.sh [seed] [--bulk N]
+#   seed       which seed in scripts/seed/seeds/ to use (default: everyday)
 #   --bulk N   also add N filler photos, for scroll testing (e.g. --bulk 1200)
+#   --list     show the available seeds
 
 set -euo pipefail
 
 NAME="Sift Dev iPhone"
 DEVICE_TYPE="iPhone 17"
+SEED_DIR="$(cd "$(dirname "$0")" && pwd)/seed"
+SEED="everyday"
 BULK=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --bulk) BULK="$2"; shift 2 ;;
-    -h | --help) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *) echo "Unknown option: $1 (try --help)" >&2; exit 1 ;;
+    --list) echo "Seeds:"; swift "$SEED_DIR/generate.swift" --list "$SEED_DIR/seeds"; exit 0 ;;
+    -h | --help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -*) echo "Unknown option: $1 (try --help)" >&2; exit 1 ;;
+    *) SEED="$1"; shift ;;
   esac
 done
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SEED_FILE="$SEED_DIR/seeds/$SEED.json"
+if [[ ! -f "$SEED_FILE" ]]; then
+  echo "No seed named \"$SEED\". Seeds:" >&2
+  swift "$SEED_DIR/generate.swift" --list "$SEED_DIR/seeds" >&2
+  exit 1
+fi
 
 # Newest installed iOS runtime.
 RUNTIME=$(xcrun simctl list runtimes -j | python3 -c '
@@ -51,7 +62,8 @@ xcrun simctl bootstatus "$UDID" -b > /dev/null
 
 PHOTOS=$(mktemp -d)
 trap 'rm -rf "$PHOTOS"' EXIT
-swift "$SCRIPT_DIR/SeedPhotos.swift" "$PHOTOS" "$BULK"
+echo "Seed \"$SEED\":"
+swift "$SEED_DIR/generate.swift" "$SEED_FILE" "$PHOTOS" "$BULK"
 
 echo "Importing into Photos..."
 find "$PHOTOS" -name '*.jpg' -print0 | sort -z | xargs -0 -n 200 xcrun simctl addmedia "$UDID"

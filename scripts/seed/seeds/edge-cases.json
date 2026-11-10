@@ -1,0 +1,26 @@
+{
+  "description": "Grouping boundaries: gaps near 90 minutes, moving over 1 km, midnight, travel, missing locations.",
+  "expected": [
+    "Boston Common, 85-minute gap: 1 moment (under the 90-minute gap)",
+    "Boston Common, 95-minute gap: 2 moments (over it)",
+    "Fenway then Harvard Square 10 minutes later: 2 moments (about 3.5 km apart)",
+    "Seaport, 11:20 PM to 12:50 AM: 1 moment that crosses midnight",
+    "Kendall Square with no-location shots in the middle: probably 1 moment (open question for #5)",
+    "Flight day, Logan in the morning and Lisbon in the evening: 2 moments",
+    "Old photos 40 days ago: not shown"
+  ],
+  "scenarios": [
+    { "name": "Boston Common, before an 85-minute gap", "timeZone": "America/New_York", "latitude": 42.3550, "longitude": -71.0656, "daysAgo": 6, "start": "14:00", "minutes": 20, "bursts": 3, "hue": 0.30 },
+    { "name": "Boston Common, after an 85-minute gap", "timeZone": "America/New_York", "latitude": 42.3550, "longitude": -71.0656, "daysAgo": 6, "start": "15:45", "minutes": 20, "bursts": 3, "hue": 0.34 },
+    { "name": "Boston Common, before a 95-minute gap", "timeZone": "America/New_York", "latitude": 42.3550, "longitude": -71.0656, "daysAgo": 8, "start": "14:00", "minutes": 20, "bursts": 3, "hue": 0.60 },
+    { "name": "Boston Common, after a 95-minute gap", "timeZone": "America/New_York", "latitude": 42.3550, "longitude": -71.0656, "daysAgo": 8, "start": "15:55", "minutes": 20, "bursts": 3, "hue": 0.64 },
+    { "name": "Fenway Park", "timeZone": "America/New_York", "latitude": 42.3467, "longitude": -71.0972, "daysAgo": 10, "start": "12:00", "minutes": 20, "bursts": 3, "hue": 0.02 },
+    { "name": "Harvard Square, 10 minutes later", "timeZone": "America/New_York", "latitude": 42.3736, "longitude": -71.1190, "daysAgo": 10, "start": "12:30", "minutes": 20, "bursts": 3, "hue": 0.15 },
+    { "name": "Seaport, across midnight", "timeZone": "America/New_York", "latitude": 42.3519, "longitude": -71.0446, "daysAgo": 4, "start": "23:20", "minutes": 90, "bursts": 6, "hue": 0.72 },
+    { "name": "Kendall Square", "timeZone": "America/New_York", "latitude": 42.3629, "longitude": -71.0901, "daysAgo": 12, "start": "10:00", "minutes": 60, "bursts": 4, "hue": 0.48 },
+    { "name": "Kendall Square, shots with no location", "timeZone": "America/New_York", "daysAgo": 12, "start": "10:30", "minutes": 10, "bursts": 2, "hue": 0.50 },
+    { "name": "Flight day, Logan Airport", "timeZone": "America/New_York", "latitude": 42.3656, "longitude": -71.0096, "daysAgo": 14, "start": "07:00", "minutes": 30, "bursts": 3, "hue": 0.58 },
+    { "name": "Flight day, arriving in Lisbon", "timeZone": "Europe/Lisbon", "latitude": 38.7742, "longitude": -9.1342, "daysAgo": 14, "start": "19:30", "minutes": 30, "bursts": 3, "hue": 0.10 },
+    { "name": "Old photos (older than 30 days)", "timeZone": "America/New_York", "latitude": 42.3550, "longitude": -71.0656, "daysAgo": 40, "start": "12:00", "minutes": 30, "bursts": 3, "hue": 0.90 }
+  ]
+}
