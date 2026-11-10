@@ -17,8 +17,8 @@ app/
     Views/         one folder per screen (Moments/, Vault/, ...); RootView owns the tab navigation stacks
     DesignSystem/  fonts, radii, shared components (StatusView, Banner)
     Resources/     bundled files (Fonts/)
-    Models/        (planned) plain data types, no PhotoKit or SwiftUI
-    Services/      @Observable models for system work: photo library access (PhotoLibraryAccess), later grouping, Vision, geocoding
+    Models/        plain data types (PhotoMeta), no PhotoKit or SwiftUI; mark them `nonisolated` so tests and background work can use them
+    Services/      @Observable models for system work: PhotoLibraryAccess (permission), PhotoLibrary (photos, thumbnails), later grouping, Vision, geocoding
     Assets.xcassets
   siftTests/       unit tests (Swift Testing)
   siftUITests/     UI tests, e.g. the photo permission flow (not run in CI)
@@ -43,6 +43,8 @@ xcodebuild -project sift.xcodeproj -scheme sift -destination 'platform=iOS Simul
 ```
 
 `xcrun simctl privacy grant photos` doesn't give the read-write access Sift checks, so test permission states through the UI tests instead.
+
+To test with a big library, add images to the booted simulator with `xcrun simctl addmedia booted <files...>`. The scroll-hitch metric only works on a real iPhone; the simulator reports scroll duration only.
 
 Build before saying a change works. Run the unit tests when touching `Models/` or `Services/`.
 
@@ -77,7 +79,7 @@ Pick "Sift Dev iPhone" as the run destination, or pass `-destination 'platform=i
 - Use Apple's types directly (e.g. `PHAuthorizationStatus`) instead of wrapping them in our own.
 - Don't add a helper, extension, or shared type until it's needed in more than one place. A one-line check used once stays inline.
 - Use the design tokens, never hard-coded values: colors from `Assets.xcassets` (`.ink`, `.canvas`, ...), fonts from `Font` (`.heading`, `.bodyText`, ...), corners from `Radius`. See `docs/design.md`.
-- Keep comments short and only where the reason isn't obvious. No Xcode file header comments.
+- Keep comments short and only where the reason isn't obvious. Write them as direct statements ("Used to request thumbnails", not "so that we can maybe..."). Don't mention ticket numbers in code; those belong in PRs. No Xcode file header comments.
 
 ## Workflow
 

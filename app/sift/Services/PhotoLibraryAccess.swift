@@ -6,7 +6,7 @@ import UIKit
 /// instead of talking to PhotoKit or Settings themselves.
 ///
 /// iOS only lets an app see the library with read-write access, and that same access lets
-/// Sift create the Archive album later (#14), so the user is asked once.
+/// Sift create the Archive album, so the user is asked once.
 @Observable
 final class PhotoLibraryAccess {
   private(set) var status: PHAuthorizationStatus
