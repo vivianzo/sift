@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Temporary grid for checking that photo loading works (#4). The Moments list replaces it in #7.
+/// Temporary grid that shows every loaded photo. Replaced by the Moments list.
 struct RecentPhotosGrid: View {
   let photos: [PhotoMeta]
 

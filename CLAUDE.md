@@ -64,7 +64,7 @@ Build before saying a change works. Run the unit tests when touching `Models/` o
 - Use Apple's types directly (e.g. `PHAuthorizationStatus`) instead of wrapping them in our own.
 - Don't add a helper, extension, or shared type until it's needed in more than one place. A one-line check used once stays inline.
 - Use the design tokens, never hard-coded values: colors from `Assets.xcassets` (`.ink`, `.canvas`, ...), fonts from `Font` (`.heading`, `.bodyText`, ...), corners from `Radius`. See `docs/design.md`.
-- Keep comments short and only where the reason isn't obvious. No Xcode file header comments.
+- Keep comments short and only where the reason isn't obvious. Write them as direct statements ("Used to request thumbnails", not "so that we can maybe..."). Don't mention ticket numbers in code; those belong in PRs. No Xcode file header comments.
 
 ## Workflow
 

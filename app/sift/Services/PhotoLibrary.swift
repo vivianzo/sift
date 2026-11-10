@@ -6,35 +6,39 @@ import UIKit
 /// thumbnails here instead of talking to PhotoKit themselves.
 @Observable
 final class PhotoLibrary {
+  /// What views show and grouping uses. Each load replaces it.
   private(set) var photos: [PhotoMeta] = []
 
-  @ObservationIgnored private var assets: [String: PHAsset] = [:]
-  @ObservationIgnored private let imageManager = PHCachingImageManager()
+  /// PhotoKit's handle for each photo, used only to request thumbnails. Views never read it,
+  /// so changes to it don't redraw anything. Each load replaces it.
+  private var assetsByID: [String: PHAsset] = [:]
+  private let imageManager = PHCachingImageManager()
 
-  /// Loads photos taken in the last `days` days, newest first.
-  func loadRecent(days: Int = 30) {
-    let since = Calendar.current.date(byAdding: .day, value: -days, to: .now) ?? .now
+  /// Loads photos taken in the last `pastDays` days, newest first.
+  func loadRecent(pastDays: Int = 30) {
+    let earliestDate = Calendar.current.date(byAdding: .day, value: -pastDays, to: .now) ?? .now
     let options = PHFetchOptions()
     options.predicate = NSPredicate(
       format: "mediaType == %d AND creationDate >= %@",
       PHAssetMediaType.image.rawValue,
-      since as NSDate
+      earliestDate as NSDate
     )
     options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
 
     let result = PHAsset.fetchAssets(with: options)
     let fetched = result.objects(at: IndexSet(integersIn: 0..<result.count))
-    assets = Dictionary(uniqueKeysWithValues: fetched.map { ($0.localIdentifier, $0) })
+    assetsByID = Dictionary(uniqueKeysWithValues: fetched.map { ($0.localIdentifier, $0) })
     photos = fetched.compactMap { asset in
       asset.creationDate.map { PhotoMeta(id: asset.localIdentifier, date: $0, location: asset.location) }
     }
   }
 
-  /// A fast, blurry thumbnail first, then the sharp one. Cancelling the task that reads
-  /// the stream (e.g. a grid cell scrolling away) cancels the request.
+  /// Streams a fast, blurry thumbnail, then the sharp one. Images aren't stored here:
+  /// `PHCachingImageManager` keeps its own cache and frees memory as needed.
+  /// Cancelling the task that reads the stream, e.g. when a grid cell scrolls away, cancels the request.
   func thumbnails(for id: String, size: CGSize) -> AsyncStream<UIImage> {
     AsyncStream { continuation in
-      guard let asset = assets[id] else {
+      guard let asset = assetsByID[id] else {
         continuation.finish()
         return
       }
