@@ -8,6 +8,8 @@ import UIKit
 final class PhotoLibrary {
   /// What views show and grouping uses. Each load replaces it.
   private(set) var photos: [PhotoMeta] = []
+  /// `photos` grouped into moments, oldest first. Each load replaces it.
+  private(set) var moments: [Moment] = []
 
   /// PhotoKit's handle for each photo, used only to request thumbnails. Views never read it,
   /// so changes to it don't redraw anything. Each load replaces it.
@@ -31,6 +33,7 @@ final class PhotoLibrary {
     photos = fetched.compactMap { asset in
       asset.creationDate.map { PhotoMeta(id: asset.localIdentifier, date: $0, location: asset.location) }
     }
+    moments = Moment.group(photos)
   }
 
   /// Streams a fast, blurry thumbnail, then the sharp one. Images aren't stored here:
