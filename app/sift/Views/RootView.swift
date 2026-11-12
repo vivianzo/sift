@@ -6,6 +6,7 @@ import SwiftUI
 struct RootView: View {
   @Environment(PhotoLibraryAccess.self) private var photoAccess
   @Environment(PhotoLibrary.self) private var photoLibrary
+  @Environment(MomentNames.self) private var momentNames
 
   var body: some View {
     Group {
@@ -17,13 +18,13 @@ struct RootView: View {
       }
     }
     .task(id: photoAccess.status) {
-      loadPhotosIfAllowed()
+      await loadPhotosIfAllowed()
     }
     // Access and photos can both change while the app is in the background, e.g. in Settings.
     // Unlike `scenePhase`, this doesn't fire at launch or after the permission prompt.
     .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
       photoAccess.refresh()
-      loadPhotosIfAllowed()
+      Task { await loadPhotosIfAllowed() }
     }
   }
 
@@ -49,10 +50,10 @@ struct RootView: View {
     }
   }
 
-  private func loadPhotosIfAllowed() {
-    if photoAccess.status == .authorized || photoAccess.status == .limited {
-      photoLibrary.loadRecent()
-    }
+  private func loadPhotosIfAllowed() async {
+    guard photoAccess.status == .authorized || photoAccess.status == .limited else { return }
+    photoLibrary.loadRecent()
+    await momentNames.lookUp(photoLibrary.moments)
   }
 
   // SwiftUI doesn't carry this background over to pushed screens, so those set their own.
@@ -67,4 +68,5 @@ struct RootView: View {
   RootView()
     .environment(PhotoLibraryAccess())
     .environment(PhotoLibrary())
+    .environment(MomentNames())
 }
