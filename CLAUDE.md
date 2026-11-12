@@ -44,7 +44,7 @@ xcodebuild -project sift.xcodeproj -scheme sift -destination 'platform=iOS Simul
 
 `xcrun simctl privacy grant photos` doesn't give the read-write access Sift checks, so test permission states through the UI tests instead.
 
-To test with a big library, add images to the booted simulator with `xcrun simctl addmedia booted <files...>`. The scroll-hitch metric only works on a real iPhone; the simulator reports scroll duration only.
+The scroll-hitch metric only works on a real iPhone; the simulator reports scroll duration only.
 
 Build before saying a change works. Run the unit tests when touching `Models/` or `Services/`.
 
