@@ -99,6 +99,17 @@ struct MomentGroupingTests {
     #expect(Moment.group(photos).count == 1)
   }
 
+  @Test func momentNeedsAtLeastOnePhoto() {
+    #expect(Moment(photos: []) == nil)
+  }
+
+  @Test func momentSortsItsPhotos() throws {
+    let moment = try #require(
+      Moment(photos: [photo("late", minutes: 10, at: tdGarden), photo("early", minutes: 0, at: tdGarden)]))
+    #expect(moment.photos.map(\.id) == ["early", "late"])
+    #expect(moment.id == "early")
+  }
+
   @Test func sortsPhotosOldestFirst() {
     let photos = [
       photo("late", minutes: 300, at: tdGarden),
