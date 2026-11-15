@@ -5,7 +5,7 @@ struct MomentsView: View {
 
   var body: some View {
     Group {
-      if library.photos.isEmpty {
+      if library.moments.isEmpty {
         StatusView(
           .message(
             title: "No moments yet",
@@ -14,7 +14,7 @@ struct MomentsView: View {
           )
         )
       } else {
-        RecentPhotosGrid(photos: library.photos)
+        RecentPhotosGrid(photos: Array(library.moments.flatMap(\.photos).reversed()))
       }
     }
     .navigationTitle("Moments")

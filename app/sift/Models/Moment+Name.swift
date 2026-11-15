@@ -2,9 +2,24 @@ import CoreLocation
 import Foundation
 
 extension Moment {
-  /// The first photo with a location, used to look up the moment's place name.
-  var location: CLLocation? {
-    photos.first(where: { $0.location != nil })?.location
+  /// A moment spread wider than this, like a day of sightseeing, is named after its city.
+  static let maxSpreadForSpotName: CLLocationDistance = 500
+
+  /// The average position of the photos that have a location.
+  var center: CLLocation? {
+    let coordinates = photos.compactMap(\.location?.coordinate)
+    guard !coordinates.isEmpty else { return nil }
+    let count = Double(coordinates.count)
+    return CLLocation(
+      latitude: coordinates.map(\.latitude).reduce(0, +) / count,
+      longitude: coordinates.map(\.longitude).reduce(0, +) / count
+    )
+  }
+
+  /// How far the farthest located photo is from `center`. Zero without locations.
+  var spread: CLLocationDistance {
+    guard let center else { return 0 }
+    return photos.compactMap(\.location).map { $0.distance(from: center) }.max() ?? 0
   }
 
   /// "Saturday evening", from when the moment started. Used when there's no place name.
@@ -13,24 +28,19 @@ extension Moment {
     weekday.calendar = calendar
     weekday.timeZone = calendar.timeZone
     weekday.locale = calendar.locale ?? .current
-    let partOfDay =
-      switch calendar.component(.hour, from: start) {
-      case 5..<12: "morning"
-      case 12..<17: "afternoon"
-      case 17..<22: "evening"
-      default: "night"
-      }
-    return "\(start.formatted(weekday)) \(partOfDay)"
+    let partOfDay = PartOfDay(hour: calendar.component(.hour, from: start))
+    return "\(start.formatted(weekday)) \(partOfDay.rawValue)"
   }
 
-  /// "TD Garden, Boston", "Beacon Hill, Boston", or "Boston". Nil when there's nothing to show.
-  static func placeName(venue: String?, neighborhood: String?, city: String?) -> String? {
-    let place = venue ?? neighborhood
-    switch (place, city) {
-    case (let place?, let city?) where place != city: return "\(place), \(city)"
-    case (let place?, _): return place
+  /// "TD Garden, Boston" or "Beacon Hill, Boston" for a moment in one spot, "Boston" for one
+  /// spread around a city. Nil when the place has nothing to show.
+  func placeName(at place: Place) -> String? {
+    let spot = spread <= Self.maxSpreadForSpotName ? place.venue ?? place.neighborhood : nil
+    switch (spot, place.city) {
+    case (let spot?, let city?) where spot != city: return "\(spot), \(city)"
+    case (let spot?, _): return spot
     case (nil, let city?): return city
-    case (nil, nil): return nil
+    case (nil, nil): return place.venue ?? place.neighborhood
     }
   }
 }
