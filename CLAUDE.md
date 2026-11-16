@@ -14,7 +14,7 @@ app/
   Info.plist       extra keys merged into the generated plist (UIAppFonts, photo usage string)
   sift/
     App/           app entry point
-    Views/         one folder per screen (Moments/, Vault/, ...); RootView owns the tab navigation stacks
+    Views/         one folder per screen (Moments/, MomentDetail/, Vault/, ...), plus views shared across screens (PhotoThumbnail); RootView owns the tab navigation stacks
     DesignSystem/  fonts, radii, shared components (StatusView, Banner)
     Resources/     bundled files (Fonts/)
     Models/        plain data types (PhotoMeta), no PhotoKit or SwiftUI; mark them `nonisolated` so tests and background work can use them
@@ -78,6 +78,7 @@ Pick "Sift Dev iPhone" as the run destination, or pass `-destination 'platform=i
 - Use `StatusView` for full-screen states (`.message`, `.loading`, `.failed`) and `Banner` for one-line notices instead of building new ones. Both take an optional `button: (title, action)`.
 - Use Apple's types directly (e.g. `PHAuthorizationStatus`) instead of wrapping them in our own.
 - Don't add a helper, extension, or shared type until it's needed in more than one place. A one-line check used once stays inline.
+- For a serif navigation bar title, put `Text(...).font(.heading)` in a `.principal` toolbar item. Don't style bars through `UINavigationBar.appearance()`: it breaks the app's tint (the tab bar turns system blue).
 - Use the design tokens, never hard-coded values: colors from `Assets.xcassets` (`.ink`, `.canvas`, ...), fonts from `Font` (`.heading`, `.bodyText`, ...), corners from `Radius`. See `docs/design.md`.
 - Keep comments short and only where the reason isn't obvious. Write them as direct statements ("Used to request thumbnails", not "so that we can maybe..."). Don't mention ticket numbers in code; those belong in PRs. No Xcode file header comments.
 
