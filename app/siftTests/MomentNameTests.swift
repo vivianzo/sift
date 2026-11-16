@@ -8,7 +8,7 @@ import Testing
 struct MomentNameTests {
   private let tdGarden = CLLocation(latitude: 42.3662, longitude: -71.0621)
   private let bostonCommon = CLLocation(latitude: 42.3550, longitude: -71.0656)
-  private let tdGardenPlace = Place(venue: "TD Garden", neighborhood: "West End", city: "Boston")
+  private let tdGardenPlace = Place(landmark: "TD Garden", neighborhood: "West End", city: "Boston")
 
   private var boston: Calendar {
     var calendar = Calendar(identifier: .gregorian)
@@ -71,15 +71,16 @@ struct MomentNameTests {
 
   @Test func placeNameFallsBackToTheNeighborhoodThenTheCity() throws {
     let spot = try moment(hour: 11, at: [tdGarden])
-    #expect(spot.placeName(at: Place(venue: nil, neighborhood: "Beacon Hill", city: "Boston")) == "Beacon Hill, Boston")
-    #expect(spot.placeName(at: Place(venue: nil, neighborhood: nil, city: "Boston")) == "Boston")
-    #expect(spot.placeName(at: Place(venue: "Fenway Park", neighborhood: nil, city: nil)) == "Fenway Park")
-    #expect(spot.placeName(at: Place(venue: nil, neighborhood: nil, city: nil)) == nil)
+    #expect(
+      spot.placeName(at: Place(landmark: nil, neighborhood: "Beacon Hill", city: "Boston")) == "Beacon Hill, Boston")
+    #expect(spot.placeName(at: Place(landmark: nil, neighborhood: nil, city: "Boston")) == "Boston")
+    #expect(spot.placeName(at: Place(landmark: "Fenway Park", neighborhood: nil, city: nil)) == "Fenway Park")
+    #expect(spot.placeName(at: Place(landmark: nil, neighborhood: nil, city: nil)) == nil)
   }
 
   @Test func placeNameDoesNotRepeatTheCity() throws {
     let spot = try moment(hour: 11, at: [tdGarden])
-    #expect(spot.placeName(at: Place(venue: nil, neighborhood: "Boston", city: "Boston")) == "Boston")
+    #expect(spot.placeName(at: Place(landmark: nil, neighborhood: "Boston", city: "Boston")) == "Boston")
   }
 
   @Test func cacheKeyRoundsToAbout100Meters() {

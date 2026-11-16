@@ -33,14 +33,14 @@ extension Moment {
   }
 
   /// "TD Garden, Boston" or "Beacon Hill, Boston" for a moment in one spot, "Boston" for one
-  /// spread around a city. Nil when the place has nothing to show.
+  /// spread around a city. Nil when the place has nothing to show. See `MomentNames.name(for:)`.
   func placeName(at place: Place) -> String? {
-    let spot = spread <= Self.maxSpreadForSpotName ? place.venue ?? place.neighborhood : nil
+    let spot = spread <= Self.maxSpreadForSpotName ? place.landmark ?? place.neighborhood : nil
     switch (spot, place.city) {
     case (let spot?, let city?) where spot != city: return "\(spot), \(city)"
     case (let spot?, _): return spot
     case (nil, let city?): return city
-    case (nil, nil): return place.venue ?? place.neighborhood
+    case (nil, nil): return place.landmark ?? place.neighborhood
     }
   }
 }

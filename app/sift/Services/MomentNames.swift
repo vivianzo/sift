@@ -19,7 +19,11 @@ final class MomentNames {
     self.places = saved.flatMap { try? JSONDecoder().decode([String: Place].self, from: $0) } ?? [:]
   }
 
-  /// The place name when there is one, otherwise a time name like "Saturday evening".
+  /// A moment's name, using the first of these that exists:
+  /// 1. Landmark and city ("TD Garden, Boston"), if the moment stays within 500 m
+  /// 2. Neighborhood and city ("Beacon Hill, Boston"), same condition
+  /// 3. City ("Boston"), for spread-out moments or when there's nothing more specific
+  /// 4. Time ("Saturday evening"), when there's no location or the place hasn't been looked up
   func name(for moment: Moment) -> String {
     moment.center
       .flatMap { places[Self.cacheKey(for: $0)] }
@@ -34,7 +38,7 @@ final class MomentNames {
       // time names and get looked up on the next load.
       guard let placemark = try? await geocoder.reverseGeocodeLocation(center).first else { return }
       places[Self.cacheKey(for: center)] = Place(
-        venue: placemark.areasOfInterest?.first,
+        landmark: placemark.areasOfInterest?.first,
         neighborhood: placemark.subLocality,
         city: placemark.locality
       )
