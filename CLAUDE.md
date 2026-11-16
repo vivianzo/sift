@@ -18,7 +18,7 @@ app/
     DesignSystem/  fonts, radii, shared components (StatusView, Banner)
     Resources/     bundled files (Fonts/)
     Models/        plain data types (PhotoMeta), no PhotoKit or SwiftUI; mark them `nonisolated` so tests and background work can use them
-    Services/      @Observable models for system work: PhotoLibraryAccess (permission), PhotoLibrary (photos, thumbnails), later grouping, Vision, geocoding
+    Services/      @Observable models for system work: PhotoLibraryAccess (permission), PhotoLibrary (photos, moments, thumbnails), MomentNames (place names), later Vision
     Assets.xcassets
   siftTests/       unit tests (Swift Testing)
   siftUITests/     UI tests, e.g. the photo permission flow (not run in CI)
@@ -65,7 +65,7 @@ Pick "Sift Dev iPhone" as the run destination, or pass `-destination 'platform=i
 
 ## Product rules
 
-- Everything runs on device. No network calls, no accounts, no analytics.
+- Everything runs on device. The one network call is Apple's reverse geocoder for moment place names (`MomentNames`): it sends a moment's coordinates, never photos, and caches the result. No other network calls, no accounts, no analytics.
 - Never copy or re-save photos. Store only `PHAsset.localIdentifier` plus our own metadata.
 - Never delete photos. Photos the user passes on go to the Archive album.
 - Grouping and scoring logic lives in pure functions over `Models/` types so it can be unit tested without PhotoKit.

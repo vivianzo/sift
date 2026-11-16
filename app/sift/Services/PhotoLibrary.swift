@@ -2,12 +2,12 @@ import Observation
 import Photos
 import UIKit
 
-/// Recent photos from the library and their thumbnails. Views read `photos` and ask for
-/// thumbnails here instead of talking to PhotoKit themselves.
+/// Recent photos from the library, grouped into moments, and their thumbnails. Views read
+/// `moments` and ask for thumbnails here instead of talking to PhotoKit themselves.
 @Observable
 final class PhotoLibrary {
-  /// What views show and grouping uses. Each load replaces it.
-  private(set) var photos: [PhotoMeta] = []
+  /// Oldest first. Each load replaces it.
+  private(set) var moments: [Moment] = []
 
   /// PhotoKit's handle for each photo, used only to request thumbnails. Views never read it,
   /// so changes to it don't redraw anything. Each load replaces it.
@@ -28,9 +28,10 @@ final class PhotoLibrary {
     let result = PHAsset.fetchAssets(with: options)
     let fetched = result.objects(at: IndexSet(integersIn: 0..<result.count))
     assetsByID = Dictionary(uniqueKeysWithValues: fetched.map { ($0.localIdentifier, $0) })
-    photos = fetched.compactMap { asset in
+    let photos = fetched.compactMap { asset in
       asset.creationDate.map { PhotoMeta(id: asset.localIdentifier, date: $0, location: asset.location) }
     }
+    moments = Moment.group(photos)
   }
 
   /// Streams a fast, blurry thumbnail, then the sharp one. Images aren't stored here:
