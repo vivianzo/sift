@@ -17,6 +17,7 @@ app/
     Views/         one folder per screen (Moments/, MomentDetail/, Vault/, ...), plus views shared across screens (PhotoThumbnail); RootView owns the tab navigation stacks
     DesignSystem/  tokens (fonts, Radius, Spacing) and shared components (Card, ScreenHeader, StatusView, Banner)
     Resources/     bundled files (Fonts/)
+    PreviewSupport/ sample data and builders for Xcode previews
     Models/        plain data types (PhotoMeta), no PhotoKit or SwiftUI; mark them `nonisolated` so tests and background work can use them
     Services/      @Observable models for system work: PhotoLibraryAccess (permission), PhotoLibrary (photos, moments, thumbnails), MomentNames (place names), later Vision
     Assets.xcassets
@@ -82,7 +83,7 @@ Pick "Sift Dev iPhone" as the run destination, or pass `-destination 'platform=i
 - Use the design tokens, never hard-coded values: colors from `Assets.xcassets` (`.ink`, `.canvas`, ...), fonts from `Font` (`.heading`, `.bodyText`, ...), corners from `Radius`, padding and gaps from `Spacing`. See `docs/design.md`.
 - Paper surfaces use `Card`; tab titles use `ScreenHeader`. Counts use `String.counted(7, "photo")` ("7 photos"), not hand-written plurals.
 - Dates shown to the user go through `DisplayCalendar` (calendar, time zone, and language in one place), not ad hoc formatters.
-- Give views and design-system components a `#Preview`. Shared sample data lives in `Views/PreviewData.swift`, outside `#if DEBUG`, because previews compile in Release builds too.
+- Give views and design-system components a `#Preview`. Shared sample data lives in `PreviewSupport/`, outside `#if DEBUG`, because previews compile in Release builds too.
 - Keep comments short and only where the reason isn't obvious. Write them as direct statements ("Used to request thumbnails", not "so that we can maybe..."). Don't mention ticket numbers in code; those belong in PRs. No Xcode file header comments.
 
 ## Workflow
