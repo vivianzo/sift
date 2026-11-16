@@ -28,7 +28,7 @@ final class MomentNames {
     moment.center
       .flatMap { places[Self.cacheKey(for: $0)] }
       .flatMap { moment.placeName(at: $0) }
-      ?? moment.timeName()
+      ?? moment.timeName
   }
 
   /// Looks up the places that aren't cached yet, one at a time.

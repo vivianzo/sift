@@ -23,13 +23,8 @@ extension Moment {
   }
 
   /// "Saturday evening", from when the moment started. Used when there's no place name.
-  func timeName(calendar: Calendar = .current) -> String {
-    var weekday = Date.FormatStyle(date: .omitted, time: .omitted).weekday(.wide)
-    weekday.calendar = calendar
-    weekday.timeZone = calendar.timeZone
-    weekday.locale = calendar.locale ?? .current
-    let partOfDay = PartOfDay(hour: calendar.component(.hour, from: start))
-    return "\(start.formatted(weekday)) \(partOfDay.rawValue)"
+  var timeName: String {
+    DisplayCalendar.current.weekdayAndPartOfDay(of: start)
   }
 
   /// "TD Garden, Boston" or "Beacon Hill, Boston" for a moment in one spot, "Boston" for one

@@ -41,6 +41,7 @@ Font files and their licenses (SIL Open Font License) are in `app/sift/Resources
 ## Shape
 
 - Radii stay small: `Radius.small` 3 (chips, thumbnails), `Radius.medium` 6 (buttons, photos), `Radius.large` 10 (cards).
+- Spacing steps (`Spacing`): `xxs` 3 (gaps between photos), `xs` 6, `sm` 8, `md` 12, `lg` 16, `xl` 20 (screen margins, gaps between cards), `xxl` 24, `xxxl` 32.
 - Use hairline borders instead of heavy shadows. Real shadows only on stacked photos and polaroids.
 
 ## Open questions

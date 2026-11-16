@@ -39,8 +39,8 @@ struct RootView: View {
                 message: "Sift can only see the photos you selected.",
                 button: ("Allow all", photoAccess.openSettings)
               )
-              .padding(.horizontal, 16)
-              .padding(.bottom, 8)
+              .padding(.horizontal, Spacing.lg)
+              .padding(.bottom, Spacing.sm)
             }
           }
       }

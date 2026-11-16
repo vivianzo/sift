@@ -15,7 +15,7 @@ struct MomentsView: View {
           )
         )
       } else {
-        list
+        momentCards
       }
     }
     .toolbar(.hidden, for: .navigationBar)
@@ -26,11 +26,12 @@ struct MomentsView: View {
     }
   }
 
-  private var list: some View {
+  private var momentCards: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 20) {
-        header
-        LazyVStack(spacing: 20) {
+      VStack(alignment: .leading, spacing: Spacing.xl) {
+        ScreenHeader(eyebrow: "Sift", title: "Moments", subtitle: subtitle)
+          .padding(.top, Spacing.md)
+        LazyVStack(spacing: Spacing.xl) {
           ForEach(library.moments.reversed()) { moment in
             NavigationLink(value: moment.id) {
               MomentCard(moment: moment, name: names.name(for: moment))
@@ -39,8 +40,8 @@ struct MomentsView: View {
           }
         }
       }
-      .padding(.horizontal, 20)
-      .padding(.bottom, 24)
+      .padding(.horizontal, Spacing.xl)
+      .padding(.bottom, Spacing.xxl)
     }
     // With the navigation bar hidden, nothing sits behind the status bar. This fills it with
     // the background so scrolled cards don't run under the clock.
@@ -49,23 +50,8 @@ struct MomentsView: View {
     }
   }
 
-  private var header: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      Text("SIFT")
-        .font(.mono)
-        .tracking(2)
-        .foregroundStyle(.highlight)
-      Text("Moments")
-        .font(.displayLarge)
-        .foregroundStyle(.ink)
-      Text(
-        library.moments.count == 1
-          ? "1 moment from the last 30 days" : "\(library.moments.count) moments from the last 30 days"
-      )
-      .font(.note)
-      .foregroundStyle(.muted)
-    }
-    .padding(.top, 12)
+  private var subtitle: String {
+    "\(String.counted(library.moments.count, "moment")) from the last 30 days"
   }
 }
 

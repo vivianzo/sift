@@ -10,7 +10,8 @@ struct MomentDetailView: View {
       .message(
         title: "No stacks yet",
         systemImage: "square.stack",
-        message: "\(moment.photos.count) photos from \(moment.dateText()). Stacks of similar shots will show up here."
+        message:
+          "\(String.counted(moment.photos.count, "photo")) from \(moment.dateText). Stacks of similar shots will show up here."
       )
     )
     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -22,5 +23,11 @@ struct MomentDetailView: View {
         Text(name).font(.heading).foregroundStyle(.ink)
       }
     }
+  }
+}
+
+#Preview {
+  NavigationStack {
+    MomentDetailView(moment: .preview, name: "TD Garden, Boston")
   }
 }

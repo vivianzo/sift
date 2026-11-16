@@ -34,8 +34,9 @@ struct MomentNameTests {
     (23, "Saturday night"),
     (2, "Saturday night"),
   ])
-  func timeNameUsesTheStartTime(hour: Int, expected: String) throws {
-    #expect(try moment(hour: hour).timeName(calendar: boston) == expected)
+  func weekdayAndPartOfDayUsesTheStartTime(hour: Int, expected: String) throws {
+    let start = try moment(hour: hour).start
+    #expect(DisplayCalendar(calendar: boston).weekdayAndPartOfDay(of: start) == expected)
   }
 
   @Test(arguments: [(4, PartOfDay.night), (5, .morning), (12, .afternoon), (17, .evening), (22, .night)])
@@ -98,6 +99,6 @@ struct MomentNameTests {
 
     #expect(names.name(for: try moment(hour: 20, at: [tdGarden])) == "TD Garden, Boston")
     let noLocation = try moment(hour: 20)
-    #expect(names.name(for: noLocation) == noLocation.timeName())
+    #expect(names.name(for: noLocation) == noLocation.timeName)
   }
 }

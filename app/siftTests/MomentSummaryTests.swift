@@ -30,16 +30,21 @@ struct MomentSummaryTests {
     #expect(try moment(count: 27).coverPhotos.map(\.id) == ["p0", "p13", "p26"])
   }
 
-  @Test func dateTextShowsTheDayAndTimeRange() throws {
-    // 172 minutes: 8:12 to 11:04 PM.
-    let text = try moment(count: 2, gap: 172).dateText(calendar: boston)
-    #expect(text.hasPrefix("Thu, Nov 5 · 8:12"))
-    #expect(text.contains("11:04"))
+  @Test func dayShowsWeekdayMonthAndDay() throws {
+    #expect(DisplayCalendar(calendar: boston).day(of: try moment(count: 1).start) == "Thu, Nov 5")
   }
 
-  @Test func dateTextShowsOneTimeForAQuickMoment() throws {
-    // iOS puts a narrow no-break space before "PM".
-    let text = try moment(count: 1).dateText(calendar: boston).replacingOccurrences(of: "\u{202F}", with: " ")
-    #expect(text == "Thu, Nov 5 · 8:12 PM")
+  @Test func dayUsesTheCalendarsTimeZone() throws {
+    // 8:12 PM in Boston is already Friday in Lisbon.
+    var lisbon = boston
+    lisbon.timeZone = TimeZone(identifier: "Europe/Lisbon")!
+    #expect(DisplayCalendar(calendar: lisbon).day(of: try moment(count: 1).start) == "Fri, Nov 6")
+  }
+
+  @Test(arguments: [
+    (1, "photo", "1 photo"), (7, "photo", "7 photos"), (1, "moment", "1 moment"), (12, "moment", "12 moments"),
+  ])
+  func countedPicksThePlural(count: Int, noun: String, expected: String) {
+    #expect(String.counted(count, noun) == expected)
   }
 }

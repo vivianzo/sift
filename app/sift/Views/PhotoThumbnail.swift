@@ -29,3 +29,12 @@ struct PhotoThumbnail: View {
       }
   }
 }
+
+#Preview("Placeholder while loading") {
+  // Previews have no photo library, so this shows the placeholder a cell has before its image loads.
+  PhotoThumbnail(id: "preview", side: 120)
+    .frame(width: 120, height: 160)
+    .padding(Spacing.xl)
+    .background(.canvas)
+    .environment(PhotoLibrary())
+}
