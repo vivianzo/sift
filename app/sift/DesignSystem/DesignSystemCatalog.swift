@@ -32,11 +32,11 @@ private struct DesignSystemCatalog: View {
 
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 32) {
+      VStack(alignment: .leading, spacing: Spacing.xxxl) {
         section("Colors") {
-          LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 12)], spacing: 12) {
+          LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: Spacing.md)], spacing: Spacing.md) {
             ForEach(colors, id: \.name) { item in
-              VStack(alignment: .leading, spacing: 6) {
+              VStack(alignment: .leading, spacing: Spacing.xs) {
                 RoundedRectangle(cornerRadius: Radius.medium)
                   .fill(item.color)
                   .frame(height: 56)
@@ -48,9 +48,9 @@ private struct DesignSystemCatalog: View {
         }
 
         section("Type") {
-          VStack(alignment: .leading, spacing: 14) {
+          VStack(alignment: .leading, spacing: Spacing.md) {
             ForEach(fonts, id: \.name) { item in
-              VStack(alignment: .leading, spacing: 2) {
+              VStack(alignment: .leading, spacing: Spacing.xxs) {
                 Text("Lorde at TD Garden").font(item.font)
                 Text(item.name).font(.mono).foregroundStyle(.muted)
               }
@@ -59,9 +59,9 @@ private struct DesignSystemCatalog: View {
         }
 
         section("Radius") {
-          HStack(spacing: 16) {
+          HStack(spacing: Spacing.lg) {
             ForEach(radii, id: \.name) { item in
-              VStack(spacing: 6) {
+              VStack(spacing: Spacing.xs) {
                 RoundedRectangle(cornerRadius: item.value)
                   .fill(.paper)
                   .stroke(.hairline)
@@ -72,14 +72,14 @@ private struct DesignSystemCatalog: View {
           }
         }
       }
-      .padding(20)
+      .padding(Spacing.xl)
     }
     .background(.canvas)
     .foregroundStyle(.ink)
   }
 
   private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
-    VStack(alignment: .leading, spacing: 14) {
+    VStack(alignment: .leading, spacing: Spacing.md) {
       Text(title).font(.heading)
       content()
     }
