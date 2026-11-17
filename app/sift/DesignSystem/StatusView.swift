@@ -5,11 +5,14 @@ struct StatusView: View {
   enum Status {
     case message(
       title: String, systemImage: String, message: String, button: (title: String, action: () -> Void)? = nil)
-    case loading(message: String)
+    /// `progress` runs from 0 to 1. Without it, the indicator spins.
+    case loading(message: String, progress: Double? = nil)
     case failed(message: String, retry: () -> Void)
   }
 
   let status: Status
+
+  private let progressWidth: CGFloat = 200
 
   init(_ status: Status) {
     self.status = status
@@ -29,7 +32,12 @@ struct StatusView: View {
             .buttonStyle(.borderedProminent)
         }
       }
-    case .loading(let message):
+    case .loading(let message, let progress?):
+      ProgressView(value: progress) {
+        Text(message).font(.note).foregroundStyle(.muted)
+      }
+      .frame(maxWidth: progressWidth)
+    case .loading(let message, nil):
       ProgressView {
         Text(message).font(.note).foregroundStyle(.muted)
       }
@@ -62,6 +70,10 @@ struct StatusView: View {
 
 #Preview("Loading") {
   StatusView(.loading(message: "Grouping your photos…"))
+}
+
+#Preview("Loading with progress") {
+  StatusView(.loading(message: "Finding similar shots", progress: 0.4))
 }
 
 #Preview("Failed") {

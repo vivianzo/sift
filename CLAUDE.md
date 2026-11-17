@@ -19,7 +19,7 @@ app/
     Resources/     bundled files (Fonts/)
     PreviewSupport/ sample data and builders for Xcode previews
     Models/        plain data types (PhotoMeta), no PhotoKit or SwiftUI; mark them `nonisolated` so tests and background work can use them
-    Services/      @Observable models for system work: PhotoLibraryAccess (permission), PhotoLibrary (photos, moments, thumbnails), MomentNames (place names), later Vision
+    Services/      @Observable models for system work: PhotoLibraryAccess (permission), PhotoLibrary (photos, moments, thumbnails), MomentNames (place names), PhotoStacks (near-duplicate stacks with Vision)
     Assets.xcassets
   siftTests/       unit tests (Swift Testing)
   siftUITests/     UI tests, e.g. the photo permission flow (not run in CI)

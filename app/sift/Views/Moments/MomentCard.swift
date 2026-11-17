@@ -5,6 +5,8 @@ struct MomentCard: View {
   let moment: Moment
   let name: String
 
+  @Environment(PhotoStacks.self) private var stacks
+
   private let collageHeight: CGFloat = 176
   private let sideColumnWidth: CGFloat = 120
 
@@ -41,7 +43,7 @@ struct MomentCard: View {
 
   /// One big photo on the left and up to two stacked on the right, like the prototype.
   @ViewBuilder private var collage: some View {
-    let photos = moment.coverPhotos
+    let photos = moment.coverPhotos(from: stacks.stacks(for: moment))
     HStack(spacing: Spacing.xxs) {
       PhotoThumbnail(id: photos[0].id, side: collageHeight * 1.4)
       if photos.count > 1 {
@@ -61,4 +63,5 @@ struct MomentCard: View {
     .padding(Spacing.xl)
     .background(.canvas)
     .environment(PhotoLibrary())
+    .environment(PhotoStacks(library: PhotoLibrary()))
 }

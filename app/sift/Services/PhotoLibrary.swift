@@ -34,6 +34,27 @@ final class PhotoLibrary {
     moments = Moment.group(photos)
   }
 
+  /// A small, sharp copy of a photo for Vision, kept in memory only. Nil if the photo is gone or
+  /// only in iCloud: Sift doesn't download photos.
+  func analysisImage(for id: String) async -> CGImage? {
+    guard let asset = assetsByID[id] else { return nil }
+    let options = PHImageRequestOptions()
+    options.deliveryMode = .highQualityFormat
+    options.resizeMode = .fast
+    options.isNetworkAccessAllowed = false
+    return await withCheckedContinuation { continuation in
+      // With `.highQualityFormat`, Photos calls this exactly once.
+      imageManager.requestImage(
+        for: asset,
+        targetSize: CGSize(width: 512, height: 512),
+        contentMode: .aspectFit,
+        options: options
+      ) { @Sendable image, _ in
+        continuation.resume(returning: image?.cgImage)
+      }
+    }
+  }
+
   /// Streams a fast, blurry thumbnail, then the sharp one. Images aren't stored here:
   /// `PHCachingImageManager` keeps its own cache and frees memory as needed.
   /// Cancelling the task that reads the stream, e.g. when a grid cell scrolls away, cancels the request.
