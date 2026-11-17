@@ -7,6 +7,7 @@ struct RootView: View {
   @Environment(PhotoLibraryAccess.self) private var photoAccess
   @Environment(PhotoLibrary.self) private var photoLibrary
   @Environment(MomentNames.self) private var momentNames
+  @Environment(PhotoStacks.self) private var photoStacks
 
   var body: some View {
     Group {
@@ -53,7 +54,10 @@ struct RootView: View {
   private func loadPhotosIfAllowed() async {
     guard photoAccess.status == .authorized || photoAccess.status == .limited else { return }
     photoLibrary.loadRecent()
+    // Newest first, matching the Moments list.
+    async let stacks: Void = photoStacks.find(in: photoLibrary.moments.reversed())
     await momentNames.lookUp(photoLibrary.moments)
+    await stacks
   }
 
   // SwiftUI doesn't carry this background over to pushed screens, so those set their own.
@@ -69,4 +73,5 @@ struct RootView: View {
     .environment(PhotoLibraryAccess())
     .environment(PhotoLibrary())
     .environment(MomentNames())
+    .environment(PhotoStacks(library: PhotoLibrary()))
 }

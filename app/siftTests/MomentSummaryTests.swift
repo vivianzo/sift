@@ -21,13 +21,40 @@ struct MomentSummaryTests {
     return try #require(Moment(photos: photos))
   }
 
-  @Test(arguments: [1, 2, 3])
-  func smallMomentsShowEveryPhoto(count: Int) throws {
-    #expect(try moment(count: count).coverPhotos.map(\.id) == (0..<count).map { "p\($0)" })
+  /// Splits a moment's photos, in order, into stacks of the given sizes.
+  private func stacks(_ moment: Moment, sizes: [Int]) -> [Stack] {
+    var remaining = moment.photos[...]
+    return sizes.compactMap { size in
+      defer { remaining = remaining.dropFirst(size) }
+      return Stack(photos: Array(remaining.prefix(size)))
+    }
   }
 
-  @Test func biggerMomentsShowTheFirstMiddleAndLast() throws {
-    #expect(try moment(count: 27).coverPhotos.map(\.id) == ["p0", "p13", "p26"])
+  @Test(arguments: [1, 2, 3])
+  func smallMomentsShowEveryPhoto(count: Int) throws {
+    #expect(try moment(count: count).coverPhotos(from: nil).map(\.id) == (0..<count).map { "p\($0)" })
+  }
+
+  @Test func withoutStacksBiggerMomentsShowTheFirstMiddleAndLast() throws {
+    #expect(try moment(count: 27).coverPhotos(from: nil).map(\.id) == ["p0", "p13", "p26"])
+  }
+
+  @Test func withStacksCoversAreTheMiddleOfTheThreeBiggest() throws {
+    // Stacks p0–p1, p2–p6, p7, p8–p10, p11–p14.
+    let moment = try moment(count: 15)
+    let covers = moment.coverPhotos(from: stacks(moment, sizes: [2, 5, 1, 3, 4]))
+    #expect(covers.map(\.id) == ["p4", "p13", "p9"])
+  }
+
+  @Test func tiedStacksKeepTheirOrder() throws {
+    let moment = try moment(count: 8)
+    let covers = moment.coverPhotos(from: stacks(moment, sizes: [2, 2, 2, 2]))
+    #expect(covers.map(\.id) == ["p1", "p3", "p5"])
+  }
+
+  @Test func fewerStacksThanCoversShowsOnePerStack() throws {
+    let moment = try moment(count: 6)
+    #expect(moment.coverPhotos(from: stacks(moment, sizes: [6])).map(\.id) == ["p3"])
   }
 
   @Test func dayShowsWeekdayMonthAndDay() throws {

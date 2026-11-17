@@ -61,4 +61,5 @@ struct MomentsView: View {
   }
   .environment(PhotoLibrary())
   .environment(MomentNames())
+  .environment(PhotoStacks(library: PhotoLibrary()))
 }
